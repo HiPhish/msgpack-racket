@@ -20,6 +20,7 @@
 (module+ test
   (require rackunit))
 
+(require "msgpack.rkt")
 (provide unpack)
 
 ;;; Use type bytes to decide how to unpack the data; return extracted datum.
@@ -117,5 +118,5 @@
 
 
 (define (unpack-ext size in)
-  (values (unpack-int 8 in)
-          (read-bytes size in)))
+  (ext (unpack-int 8 in)
+       (read-bytes size in)))

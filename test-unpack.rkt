@@ -17,7 +17,7 @@
 ;;;;     <http://www.gnu.org/licenses/>.
 #lang racket
 
-(require rackunit "unpack.rkt")
+(require rackunit "msgpack.rkt" "unpack.rkt")
 
 (define-syntax test
   (syntax-rules ()
@@ -148,9 +148,9 @@
 (define (test-fixext tag size)
   ;; Hardcode #x05 as the "type" and #x80 as the "data"
   (let ([bstr (bytes-append (bytes tag #x05) (make-bytes size #x80))])
-    (let-values ([(type data) (unpack (open-input-bytes bstr))])
-      (check-= #x05 type 0)
-      (check bytes=? data (make-bytes size #x80)))))
+    (let ([ext (unpack (open-input-bytes bstr))])
+      (check-= #x05 (ext-type ext) 0)
+      (check bytes=? (ext-data ext) (make-bytes size #x80)))))
 
 (test-fixext #xD4 1)
 (test-fixext #xD5 2)
