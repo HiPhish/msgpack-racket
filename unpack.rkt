@@ -67,12 +67,10 @@
 
 ;;; --- Unpack individual types
 (define (unpack-uint size in)
-  (define (iter n i)
-    (if (= n 0)
-      i
-      (iter (- n 8)
-            (bitwise-ior i (arithmetic-shift (read-byte in) (- n 8))))))
-  (iter size #x00))
+  (let ([bstr (read-bytes (/ size 8) in)])
+    (if (= 1 (bytes-length bstr))
+      (bytes-ref bstr 0)
+      (integer-bytes->integer bstr #f #t))))
 
 (module+ test
   (for ([bstr (in-list (list
@@ -89,14 +87,13 @@
 
 
 (define (unpack-int size in)
-  ;; If the most significant bit of the first byte is one we have a negative
-  ;; integer; substitute that byte with one that has that bit set to zero and
-  ;; treat it like an unsigned integer, then multiply the result by -1.
-  (let ((negative (not (zero? (bitwise-and (peek-byte in) #b10000000))))
-        (unsigned (unpack-uint size in)))
-    (if negative
-      (- unsigned (expt 2 size))  ; two's complement
-      unsigned)))
+  (let ([bstr (read-bytes (/ size 8) in)])
+    (if (= 1 (bytes-length bstr))
+      (let ([i (bytes-ref bstr 0)])
+        (if (zero? (bitwise-and i #b10000000))
+          i
+          (- i #x100)))
+      (integer-bytes->integer bstr #t #t))))
 
 
 (define (unpack-float size in)
