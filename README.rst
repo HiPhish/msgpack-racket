@@ -19,7 +19,7 @@ Using
 
 .. code-block: racket
 
-   (require "unpack.rkt")
+   (require msgpack/unpack)
    (define in (open-input-bytes (bytes #xCD #x23 #x45)))
    (define value (unpack in))
    ;; value is now #x2345, or 9029 in decimal

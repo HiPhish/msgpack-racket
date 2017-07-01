@@ -17,8 +17,11 @@
 ;;;;     <http://www.gnu.org/licenses/>.
 #lang racket
 
-(require "msgpack.rkt")
-(provide pack)
+(require "../main.rkt")
+(provide 
+  (contract-out
+    [pack (-> any/c (and/c output-port? (not/c port-closed?)) any)]))
+
 
 (define (pack datum out)
   (cond
@@ -33,6 +36,7 @@
     [(hash? datum) (pack-map datum out)]
     [(ext? datum) (pack-ext datum out)]
     [else (error "Type not supported by MessagePack")]))
+
 
 (define (pack-ext type data out)
   (let ([len (bytes-length data)])

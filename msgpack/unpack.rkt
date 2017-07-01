@@ -20,8 +20,10 @@
 (module+ test
   (require rackunit))
 
-(require "msgpack.rkt")
-(provide unpack)
+(require "../main.rkt")
+(provide
+  (contract-out
+    [unpack (-> (and/c input-port? (not/c port-closed?)) any/c)]))
 
 ;;; Use type bytes to decide how to unpack the data; return extracted datum.
 (define (unpack in)

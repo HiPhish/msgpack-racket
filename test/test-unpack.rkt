@@ -17,7 +17,7 @@
 ;;;;     <http://www.gnu.org/licenses/>.
 #lang racket
 
-(require rackunit "msgpack.rkt" "unpack.rkt")
+(require rackunit "../main.rkt" "../msgpack/unpack.rkt")
 
 (define-syntax test
   (syntax-rules ()
