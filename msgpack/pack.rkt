@@ -192,28 +192,28 @@
       (pack key   out)
       (pack value out))))
 
-(define (pack-ext type data out)
-  (let ([len (bytes-length data)])
+(define (pack-ext ext out)
+  (let ([len (bytes-length (ext-data ext))])
     (cond
       [(= len  1) (write-byte #xD4 out)]
       [(= len  2) (write-byte #xD5 out)]
       [(= len  4) (write-byte #xD6 out)]
       [(= len  8) (write-byte #xD7 out)]
       [(= len 16) (write-byte #xD8 out)]
-      [(< len (expt 2  8))
+      [(uint8? len)
        (begin
          (write-byte #xC7 out)
          (write-bytes (integer->bytes len) out))]
-      [(< len (expt 2 16))
+      [(uint16? len)
        (begin
          (write-byte #xC8 out)
          (write-bytes (integer->bytes len) out))]
-      [(< len (expt 2 32))
+      [(uint32? len)
        (begin
          (write-byte #xC9 out)
          (write-bytes (integer->bytes len) out))])
-    (write-byte type out)
-    (write-bytes data out)))
+    (write-byte  (ext-type ext) out)
+    (write-bytes (ext-data ext) out)))
 
 
 ;;; === Helper functions ===
