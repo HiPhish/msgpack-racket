@@ -20,8 +20,9 @@
 (require "../main.rkt")
 
 
-;;; === Contract definitions ===
-(provide
+
+;;; === Packing functions ===
+(provide 
   (contract-out
     [msg-port? (-> any/c boolean?)]
     [uint8?    (-> any/c boolean?)]
@@ -33,26 +34,7 @@
     [int32?    (-> any/c boolean?)]
     [int64?    (-> any/c boolean?)]
     [+fixint?  (-> any/c boolean?)]
-    [-fixint?  (-> any/c boolean?)]))
-;;; Valid output port
-(define msg-port?
-  (and/c output-port? (not/c port-closed?)))
-;;; Int format family
-(define (uint8?   x) (and (exact-nonnegative-integer? x) (< x (expt 2  8))))
-(define (uint16?  x) (and (exact-nonnegative-integer? x) (< x (expt 2 16))))
-(define (uint32?  x) (and (exact-nonnegative-integer? x) (< x (expt 2 32))))
-(define (uint64?  x) (and (exact-nonnegative-integer? x) (< x (expt 2 64))))
-(define (int8?    x) (and (exact-integer? x) (<= (- (expt 2  7)) x (- (expt 2  7) 1))))
-(define (int16?   x) (and (exact-integer? x) (<= (- (expt 2 15)) x (- (expt 2 15) 1))))
-(define (int32?   x) (and (exact-integer? x) (<= (- (expt 2 31)) x (- (expt 2 31) 1))))
-(define (int64?   x) (and (exact-integer? x) (<= (- (expt 2 63)) x (- (expt 2 63) 1))))
-(define (+fixint? x) (and (exact-nonnegative-integer? x) (<= x #b01111111)))
-(define (-fixint? x) (and (exact-integer? x) (negative? x) (>= x #b-00011111)))
-
-
-;;; === Packing functions ===
-(provide 
-  (contract-out
+    [-fixint?  (-> any/c boolean?)]
     [pack          (-> any/c    msg-port? any)]
     [pack-nil      (-> msg-port?          any)]
     [pack-boolean  (-> boolean? msg-port? any)]
@@ -73,6 +55,21 @@
     [pack-map      (-> hash?    msg-port? any)]
     [pack-ext      (-> ext?     msg-port? any)]
     ))
+
+;;; Valid output port
+(define msg-port?
+  (and/c output-port? (not/c port-closed?)))
+;;; Int format family
+(define (uint8?   x) (and (exact-nonnegative-integer? x) (< x (expt 2  8))))
+(define (uint16?  x) (and (exact-nonnegative-integer? x) (< x (expt 2 16))))
+(define (uint32?  x) (and (exact-nonnegative-integer? x) (< x (expt 2 32))))
+(define (uint64?  x) (and (exact-nonnegative-integer? x) (< x (expt 2 64))))
+(define (int8?    x) (and (exact-integer? x) (<= (- (expt 2  7)) x (- (expt 2  7) 1))))
+(define (int16?   x) (and (exact-integer? x) (<= (- (expt 2 15)) x (- (expt 2 15) 1))))
+(define (int32?   x) (and (exact-integer? x) (<= (- (expt 2 31)) x (- (expt 2 31) 1))))
+(define (int64?   x) (and (exact-integer? x) (<= (- (expt 2 63)) x (- (expt 2 63) 1))))
+(define (+fixint? x) (and (exact-nonnegative-integer? x) (<= x #b01111111)))
+(define (-fixint? x) (and (exact-integer? x) (negative? x) (>= x #b-00011111)))
 
 (define (pack datum out)
   (cond
