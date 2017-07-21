@@ -19,9 +19,17 @@
 
 (require
   rackunit
-  (file "../msgpack/pack.rkt"))
+  "../../msgpack/pack.rkt")
 
-;;; Require modules with type-specific test cases
-(require (file "pack/nil.rkt")
-         (file "pack/boolean.rkt")
-         (file "pack/integers.rkt"))
+;;; There are two values and two functions: the generic 'pack' and the more
+;;; specific 'pack-boolean'. We need to test that both functions perform the
+;;; same for each value.
+(for ([val (in-list '(#f   #t))]
+      [tag (in-list '(#xC2 #xC3))])
+  (for ([pack-func (in-list (list pack pack-boolean))])
+    (let ([out (open-output-bytes)])
+      (pack-func val out)
+      (check
+        bytes=?
+        (get-output-bytes out)
+        (bytes tag)))))

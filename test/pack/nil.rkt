@@ -19,9 +19,20 @@
 
 (require
   rackunit
-  (file "../msgpack/pack.rkt"))
+  "../../msgpack/pack.rkt")
 
-;;; Require modules with type-specific test cases
-(require (file "pack/nil.rkt")
-         (file "pack/boolean.rkt")
-         (file "pack/integers.rkt"))
+;;; Specific function
+(let ([out (open-output-bytes)])
+  (pack-nil out)
+  (check
+    bytes=?
+    (get-output-bytes out)
+    (bytes #xC0)))
+
+;;; Generic function, requires an object to pack
+(let ([out (open-output-bytes)])
+  (pack '() out)
+  (check
+    bytes=?
+    (get-output-bytes out)
+    (bytes #xC0)))
