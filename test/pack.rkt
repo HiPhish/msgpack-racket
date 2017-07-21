@@ -1,4 +1,4 @@
-;;;; Copyright 1999 Alejandro Sanchez
+;;;; Copyright 2017 Alejandro Sanchez
 ;;;;
 ;;;; This file is part of MessagePack.rkt
 ;;;; 
@@ -15,7 +15,14 @@
 ;;;;     You should have received a copy of the GNU General Public License
 ;;;;     along with MessagePack.rkt.  If not, see
 ;;;;     <http://www.gnu.org/licenses/>.
-#lang info
+#lang racket
 
-(define name "msgpack")
-(define scribblings '(["scribblings/msgpack.scrbl" ()]))
+(require
+  quickcheck
+  rackunit/quickcheck
+  "../msgpack/main.rkt"
+  "../msgpack/pack.rkt"
+  "../msgpack/unpack.rkt")
+
+;;; Require modules with type-specific test cases
+(require "pack/integers.rkt")

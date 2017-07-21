@@ -19,9 +19,6 @@
 
 (require "../main.rkt")
 
-
-
-;;; === Packing functions ===
 (provide 
   (contract-out
     [msg-port? (-> any/c boolean?)]
@@ -53,8 +50,7 @@
     [pack-bin      (-> bytes?   msg-port? any)]
     [pack-array    (-> vector?  msg-port? any)]
     [pack-map      (-> hash?    msg-port? any)]
-    [pack-ext      (-> ext?     msg-port? any)]
-    ))
+    [pack-ext      (-> ext?     msg-port? any)]))
 
 ;;; Valid output port
 (define msg-port?
@@ -75,7 +71,7 @@
   (cond
     [(null?    datum) (pack-nil out)]
     [(boolean? datum) (pack-boolean datum out)]
-    [(integer? datum) ((if (> datum 0) pack-uint pack-int) datum out)]
+    [(integer? datum) ((if (>= datum 0) pack-uint pack-int) datum out)]
     [(real?    datum) (pack-float datum)]
     [(flonum?  datum) (pack-float datum)]
     [(string?  datum) (pack-string datum out)]
@@ -96,11 +92,11 @@
     [(+fixint? uint) (void)]
     [(uint8?   uint) (write-byte #xCC out)]
     [(uint16?  uint) (write-byte #xCD out)]
-    [(uint32?  uint) (write-byte #xCD out)]
-    [(uint64?  uint) (write-byte #xCD out)]
+    [(uint32?  uint) (write-byte #xCE out)]
+    [(uint64?  uint) (write-byte #xCF out)]
     [else
       (error "Unsigned integer must not be larger than 2^64 - 1")])
-  (write-bytes (integer->bytes uint 2 #f) out))
+  (write-bytes (integer->bytes uint #f) out))
 
 (define (pack-int int out)
   (if (-fixint? int)
@@ -114,15 +110,13 @@
         [(int32? int) (write-byte #xD2 out)]
         [(int64? int) (write-byte #xD3 out)]
         [else (error "Cannot pack integers larger than 64 bits.")])
-       (write-bytes (integer->bytes int) out))))
+       (write-bytes (integer->bytes int #t) out))))
 
 (define (pack-p-fixint i out)
-  (write-byte i))
+  (write-byte i out))
 
 (define (pack-n-fixint i out)
-  (write-byte
-    (bitwise-ior #b11100000
-                 (* -1 i))))
+  (write-byte (bitwise-ior #b11100000 (abs i)) out))
 
 (define (pack-uint8  i out) (pack-uint i out))
 (define (pack-uint16 i out) (pack-uint i out))
@@ -230,7 +224,7 @@
         [(uint64? int) 8])))
   (if signed?
     (cond
-      [(int8?  int) (bytes int)]
+      [(int8?  int) (bytes (if (< int 0) (bitwise-ior #b10000000 (abs int)) int))]
       [(int64? int) (integer->integer-bytes int (number-of-bytes) #t #t)]
       [else (error "Signed integers may not be large than 8 bytes")])
     (cond
