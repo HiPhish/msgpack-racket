@@ -20,7 +20,7 @@
 (require
   quickcheck
   rackunit/quickcheck
-  "../../msgpack/pack.rkt")
+  (file "../../msgpack/pack.rkt"))
 
 
 ;;; Generate a property which specifies that for a given size and sign the

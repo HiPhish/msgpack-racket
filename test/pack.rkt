@@ -24,4 +24,12 @@
 ;;; Require modules with type-specific test cases
 (require (file "pack/nil.rkt")
          (file "pack/boolean.rkt")
-         (file "pack/integer.rkt"))
+         (file "pack/integer.rkt")
+         (file "pack/float.rkt"))
+
+;;; Types that still need test files:
+;;;   - binary strings (bin)
+;;;   - strings (str)
+;;;   - map
+;;;   - array
+;;;   - extension (ext)

@@ -18,18 +18,34 @@
 #lang racket
 
 (require
-  rackunit
+  quickcheck
+  rackunit/quickcheck
   (file "../../msgpack/pack.rkt"))
 
-;;; There are two values and two functions: the generic 'pack' and the more
-;;; specific 'pack-boolean'. We need to test that both functions perform the
-;;; same for each value.
-(for ([val (in-list '(#f   #t))]
-      [tag (in-list '(#xC2 #xC3))])
-  (for ([pack-func (in-list (list pack pack-boolean))])
+;;; All floating point real numbers have double-precision by default in Racket.
+;;; This means we have to test once using the regular arbitrary real number,
+;;; and once using the number converted to single precision.
+
+;;; Predicate which adjusts to precision automatically.
+(define (packed-properly? f bstr)
+  (define tag  (if (single-flonum? f) #xCA #xCB))
+  (define size (if (single-flonum? f)    4    8))
+  (bytes=?
+    (get-output-bytes bstr)
+    (bytes-append (bytes tag)
+                  (real->floating-point-bytes f size #t))))
+
+;;; Double-precision
+(check-property
+  (property ([f arbitrary-real])
     (let ([out (open-output-bytes)])
-      (pack-func val out)
-      (check
-        bytes=?
-        (get-output-bytes out)
-        (bytes tag)))))
+      (pack-float f out)
+      (packed-properly? f out))))
+
+;;; Single-precision
+(check-property
+  (property ([f arbitrary-real])
+    (let ([out  (open-output-bytes)]
+          [f    (real->single-flonum f)])
+      (pack-float f out)
+      (packed-properly? f out))))

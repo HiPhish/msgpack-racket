@@ -19,7 +19,7 @@
 
 (require
   rackunit
-  "../../msgpack/pack.rkt")
+  (file "../../msgpack/pack.rkt"))
 
 ;;; Specific function
 (let ([out (open-output-bytes)])
