@@ -24,4 +24,4 @@
 ;;; Require modules with type-specific test cases
 (require (file "pack/nil.rkt")
          (file "pack/boolean.rkt")
-         (file "pack/integers.rkt"))
+         (file "pack/integer.rkt"))
