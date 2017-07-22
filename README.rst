@@ -47,6 +47,9 @@ The following cases cannot be tested for the time being:
 
 - The `bin32` type, storing a byte string that is :math:`2^32` bytes long
   requires 4GiB, my machine simply runs out of memory.
+- The same goes for the `str32` type
+- Strings are only tested using ASCII characters, if anyone can generate
+  UTF-8 strings with a given length in *bytes* please help out.
 
 
 License

@@ -26,10 +26,10 @@
          (file "pack/boolean.rkt")
          (file "pack/integer.rkt")
          (file "pack/float.rkt")
-         (file "pack/binary.rkt"))
+         (file "pack/binary.rkt")
+         (file "pack/string.rkt"))
 
 ;;; Types that still need test files:
-;;;   - strings (str)
 ;;;   - map
 ;;;   - array
 ;;;   - extension (ext)
