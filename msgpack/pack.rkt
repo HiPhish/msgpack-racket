@@ -17,7 +17,7 @@
 ;;;;     <http://www.gnu.org/licenses/>.
 #lang racket
 
-(require "../main.rkt")
+(require (file "../main.rkt"))
 
 (provide 
   (contract-out
@@ -69,16 +69,16 @@
 
 (define (pack datum out)
   (cond
-    [(null?    datum) (pack-nil out)]
+    [(null?    datum) (pack-nil           out)]
     [(boolean? datum) (pack-boolean datum out)]
     [(integer? datum) ((if (>= datum 0) pack-uint pack-int) datum out)]
-    [(real?    datum) (pack-float datum out)]
-    [(flonum?  datum) (pack-float datum out)]
-    [(string?  datum) (pack-string datum out)]
-    [(bytes?   datum) (pack-bin datum out)]
-    [(vector?  datum) (pack-array datum out)]
-    [(hash?    datum) (pack-map datum out)]
-    [(ext?     datum) (pack-ext datum out)]
+    [(real?    datum) (pack-float   datum out)]
+    [(flonum?  datum) (pack-float   datum out)]
+    [(string?  datum) (pack-string  datum out)]
+    [(bytes?   datum) (pack-bin     datum out)]
+    [(vector?  datum) (pack-array   datum out)]
+    [(hash?    datum) (pack-map     datum out)]
+    [(ext?     datum) (pack-ext     datum out)]
     [else (error "Type not supported by MessagePack")]))
 
 (define (pack-nil out)
@@ -162,10 +162,10 @@
       (write-byte (bitwise-ior len #b10010000) out)
       (begin
         (cond
-          [(uint8?  len) (write-byte #xDC out)]
-          [(uint16? len) (write-byte #xDD out)]
+          [(uint16? len) (write-byte #xDC out)]
+          [(uint32? len) (write-byte #xDD out)]
           [else (error "An array may contain at most 2^32 - 1 items")])
-        (write-bytes (integer->bytes len) out)))
+        (write-bytes (integer->bytes len #f) out)))
     (for ([item (in-vector arr)])
       (pack item out))))
 

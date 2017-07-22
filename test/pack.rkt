@@ -27,9 +27,9 @@
          (file "pack/integer.rkt")
          (file "pack/float.rkt")
          (file "pack/binary.rkt")
-         (file "pack/string.rkt"))
+         (file "pack/string.rkt")
+         (file "pack/array.rkt"))
 
 ;;; Types that still need test files:
 ;;;   - map
-;;;   - array
 ;;;   - extension (ext)
