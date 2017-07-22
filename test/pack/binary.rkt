@@ -32,16 +32,16 @@
         (get-output-bytes out)
         (bytes-append (bytes #xC4 n) bs)))))
 
-;;; I cannot test strings this large, the Racket virtual machine runs out of
-;;; memory
-#;(with-test-count 1
-  (check-property
-    (property ([n (choose-integer (expt 2 16) (sub1 (expt 2 32)))])
-      (let* ([out (open-output-bytes)]
-             [bs  (make-bytes n)])
-        (pack-bin bs out)
-        (bytes=?
-          (get-output-bytes out)
-          (bytes-append (bytes #xC4)
-                        (integer->integer-bytes n 2 #f #t)
-                        bs))))))
+(check-property
+  (property ([n (choose-integer (expt 2 8) (sub1 (expt 2 16)))])
+    (let ([out (open-output-bytes)]
+          [bs  (make-bytes n)])
+      (pack-bin bs out)
+      (bytes=?
+        (get-output-bytes out)
+        (bytes-append (bytes #xC5)
+                      (integer->integer-bytes n 2 #f #t)
+                      bs)))))
+
+;;; I cannot test larger byte strings because my machine runs out of memory.
+;:: 2^16B is 64MiB, and 2^32B is 4GiB.

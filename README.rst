@@ -45,7 +45,8 @@ unpacking routines have been written, but they are largely untested yet.
 
 The following cases cannot be tested for the time being:
 
-- Byte strings larger than 255 bytes, my machine runs out of memory
+- The `bin32` type, storing a byte string that is :math:`2^32` bytes long
+  requires 4GiB, my machine simply runs out of memory.
 
 
 License
