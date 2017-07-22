@@ -17,11 +17,12 @@
 ;;;;     <http://www.gnu.org/licenses/>.
 #lang racket
 
-(provide
-  (contract-out
-    [struct ext ((type integer?) (data bytes?))]))
-
 
 ;;; The MessagePack ext type does not have a direct correspondence to a Racket
 ;;; type.
 (struct ext (type data))
+
+
+(provide
+  (contract-out
+    [struct ext ((type integer?) (data bytes?))]))
