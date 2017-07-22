@@ -18,18 +18,30 @@
 #lang racket
 
 (require
-  rackunit
-  (file "../msgpack/pack.rkt"))
+  quickcheck
+  rackunit/quickcheck
+  (file "../../msgpack/pack.rkt"))
 
-;;; Require modules with type-specific test cases
-(require (file "pack/nil.rkt")
-         (file "pack/boolean.rkt")
-         (file "pack/integer.rkt")
-         (file "pack/float.rkt")
-         (file "pack/binary.rkt"))
 
-;;; Types that still need test files:
-;;;   - strings (str)
-;;;   - map
-;;;   - array
-;;;   - extension (ext)
+(check-property
+  (property ([n (choose-integer 0 (sub1 (expt 2 8)))])
+    (let ([out (open-output-bytes)]
+          [bs  (make-bytes n)])
+      (pack-bin bs out)
+      (bytes=?
+        (get-output-bytes out)
+        (bytes-append (bytes #xC4 n) bs)))))
+
+;;; I cannot test strings this large, the Racket virtual machine runs out of
+;;; memory
+#;(with-test-count 1
+  (check-property
+    (property ([n (choose-integer (expt 2 16) (sub1 (expt 2 32)))])
+      (let* ([out (open-output-bytes)]
+             [bs  (make-bytes n)])
+        (pack-bin bs out)
+        (bytes=?
+          (get-output-bytes out)
+          (bytes-append (bytes #xC4)
+                        (integer->integer-bytes n 2 #f #t)
+                        bs))))))
