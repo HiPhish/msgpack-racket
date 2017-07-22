@@ -178,7 +178,7 @@
           [(uint16? len) (write-byte #xDE out)]
           [(uint32? len) (write-byte #xDF out)]
           [else (error "An array may contain at most 2^32 - 1 items")])
-        (write-bytes (integer->bytes len) out)))
+        (write-bytes (integer->bytes len #f) out)))
     (for ([(key value) (in-hash m)])
       (pack key   out)
       (pack value out))))
