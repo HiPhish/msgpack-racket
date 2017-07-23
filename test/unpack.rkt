@@ -23,7 +23,7 @@
          (file "unpack/integers.rkt")
          (file "unpack/float.rkt")
          (file "unpack/binary.rkt")
-         #;(file "unpack/string.rkt")
+         (file "unpack/string.rkt")
          #;(file "unpack/array.rkt")
          #;(file "unpack/map.rkt")
          #;(file "unpack/extension.rkt"))
