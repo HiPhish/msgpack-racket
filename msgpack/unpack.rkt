@@ -20,7 +20,7 @@
 (module+ test
   (require rackunit))
 
-(require "../main.rkt")
+(require "main.rkt")
 (provide
   (contract-out
     [unpack (-> (and/c input-port? (not/c port-closed?)) any/c)]))
@@ -30,8 +30,8 @@
   (let ([tag (read-byte in)])
     (cond
       [(<= #x00 tag #x7F) tag]
-      [(<= #x80 tag #x8F) (unpack-map    (bitwise-and #b11110000 tag) in)]
-      [(<= #x90 tag #x9F) (unpack-array  (bitwise-and #b11110000 tag) in)]
+      [(<= #x80 tag #x8F) (unpack-map    (bitwise-and #b00001111 tag) in)]
+      [(<= #x90 tag #x9F) (unpack-array  (bitwise-and #b00001111 tag) in)]
       [(<= #xA0 tag #xBF) (unpack-string (bitwise-and #b00011111 tag) in)]
       [(= #xC0 tag) '()]
       [(= #xC1 tag) (error "0xC1 is never used")]
