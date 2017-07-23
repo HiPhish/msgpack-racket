@@ -26,4 +26,4 @@
          (file "unpack/string.rkt")
          (file "unpack/array.rkt")
          (file "unpack/map.rkt")
-         #;(file "unpack/extension.rkt"))
+         (file "unpack/extension.rkt"))
