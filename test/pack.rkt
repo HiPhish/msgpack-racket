@@ -17,10 +17,6 @@
 ;;;;     <http://www.gnu.org/licenses/>.
 #lang racket
 
-(require
-  rackunit
-  (file "../msgpack/pack.rkt"))
-
 ;;; Require modules with type-specific test cases
 (require (file "pack/nil.rkt")
          (file "pack/boolean.rkt")
@@ -29,7 +25,5 @@
          (file "pack/binary.rkt")
          (file "pack/string.rkt")
          (file "pack/array.rkt")
-         (file "pack/map.rkt"))
-
-;;; Types that still need test files:
-;;;   - extension (ext)
+         (file "pack/map.rkt")
+         #;(file "pack/ext.rkt"))
