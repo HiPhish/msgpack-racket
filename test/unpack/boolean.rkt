@@ -17,13 +17,10 @@
 ;;;;     <http://www.gnu.org/licenses/>.
 #lang racket
 
-;;; Require modules with type-specific test cases
-(require (file "pack/nil.rkt")
-         (file "pack/boolean.rkt")
-         (file "pack/integer.rkt")
-         (file "pack/float.rkt")
-         (file "pack/binary.rkt")
-         (file "pack/string.rkt")
-         (file "pack/array.rkt")
-         (file "pack/map.rkt")
-         #;(file "pack/extension.rkt"))
+(require
+  rackunit
+  (file "../../msgpack/unpack.rkt"))
+
+
+(check-false (call-with-input-bytes (bytes #xC2) (λ (in) (unpack in))))
+(check-true  (call-with-input-bytes (bytes #xC3) (λ (in) (unpack in))))

@@ -93,9 +93,9 @@
   (let ([bstr (read-bytes (/ size 8) in)])
     (if (= 1 (bytes-length bstr))
       (let ([i (bytes-ref bstr 0)])
-        (if (zero? (bitwise-and i #b10000000))
-          i
-          (- i #x100)))
+        (if (> i #b01111111)
+          (- i #x100)
+          i))
       (integer-bytes->integer bstr #t #t))))
 
 

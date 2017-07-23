@@ -17,13 +17,23 @@
 ;;;;     <http://www.gnu.org/licenses/>.
 #lang racket
 
-;;; Require modules with type-specific test cases
-(require (file "pack/nil.rkt")
-         (file "pack/boolean.rkt")
-         (file "pack/integer.rkt")
-         (file "pack/float.rkt")
-         (file "pack/binary.rkt")
-         (file "pack/string.rkt")
-         (file "pack/array.rkt")
-         (file "pack/map.rkt")
-         #;(file "pack/extension.rkt"))
+(require
+  quickcheck
+  rackunit/quickcheck
+  (file "../../msgpack/unpack.rkt"))
+
+
+;;; Float 64 (double precision is the default in Racket)
+(check-property
+  (property ([f arbitrary-real])
+    (let ([packed (bytes-append (bytes #xCB)
+                                (real->floating-point-bytes f 8 #t))])
+      (= f (call-with-input-bytes packed (λ (in) (unpack in)))))))
+
+;;; Float 32 (similar to the above, except convert to single precision first)
+(check-property
+  (property ([f arbitrary-real])
+    (let* ([f      (real->single-flonum f)]
+           [packed (bytes-append (bytes #xCB)
+                                 (real->floating-point-bytes f 8 #t))])
+      (= f (call-with-input-bytes packed (λ (in) (unpack in)))))))
