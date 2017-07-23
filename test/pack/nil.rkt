@@ -22,17 +22,7 @@
   (file "../../msgpack/pack.rkt"))
 
 ;;; Specific function
-(let ([out (open-output-bytes)])
-  (pack-nil out)
-  (check
-    bytes=?
-    (get-output-bytes out)
-    (bytes #xC0)))
+(check bytes=? (call-with-output-bytes (λ (out) (pack-nil out))) (bytes #xC0))
 
 ;;; Generic function, requires an object to pack
-(let ([out (open-output-bytes)])
-  (pack '() out)
-  (check
-    bytes=?
-    (get-output-bytes out)
-    (bytes #xC0)))
+(check bytes=? (call-with-output-bytes (λ (out) (pack '() out))) (bytes #xC0))

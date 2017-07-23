@@ -32,20 +32,17 @@
      #`(property ([n (choose-integer
                        (if signed? (- (expt 2 (sub1 size))) 0)
                        (sub1 (expt 2 (if signed? (sub1 size) size))))])
-         (let ([out (open-output-bytes)])
-           (#,(datum->syntax stx
-                             (string->symbol
-                               (format
-                                 (if (syntax->datum #'signed?)
-                                   "pack-int~a"
-                                   "pack-uint~a")
-                                 (syntax->datum #'size))))
-            n out)
-           (bytes=?
-             (get-output-bytes out)
-             (bytes-append
-               (bytes tag)
-               (integer->integer-bytes n (/ size 8) signed? #t)))))]))
+         (let ([packf #,(datum->syntax stx
+                          (string->symbol
+                            (format
+                              (if (syntax->datum #'signed?)
+                                "pack-int~a"
+                                "pack-uint~a")
+                              (syntax->datum #'size))))])
+           (bytes=? (call-with-output-bytes (λ (out) (packf n out)))
+                    (bytes-append
+                      (bytes tag)
+                      (integer->integer-bytes n (/ size 8) signed? #t)))))]))
 
 ;;; 8-bit integers are a more complicated case because we cannot use
 ;;; integer->integer-bytes and we have to avoid stepping into the range of the
@@ -60,15 +57,13 @@
                        (if signed?
                          #b-00011111
                          (sub1 (expt 2 8))))])
-         (let ([out (open-output-bytes)])
-           (#,(datum->syntax stx
-                             (string->symbol
-                               (if (syntax->datum #'signed?)
-                                 "pack-int8"
-                                 "pack-uint8")))
-            n out)
+         (let ([packf #,(datum->syntax stx
+                          (string->symbol
+                            (if (syntax->datum #'signed?)
+                              "pack-int8"
+                              "pack-uint8")))])
            (bytes=?
-             (get-output-bytes out)
+             (call-with-output-bytes (λ (out) (packf n out)))
              (bytes-append
                (bytes tag)
                (bytes (if signed? (bitwise-ior (if (< n 0) #x80 #x00) (abs n)) n))))))]))
@@ -87,14 +82,11 @@
 ;;; Check positive "fixnum" types separately
 (check-property
   (property ([n (choose-integer 0 #b01111111)])
-    (let ([out (open-output-bytes)])
-      (pack-p-fixint n out)
-      (bytes=? (get-output-bytes out) (bytes n)))))
+    (bytes=? (call-with-output-bytes (λ (out) (pack-p-fixint n out)))
+             (bytes n))))
 
 ;;; Check negative "fixnum" types separately
 (check-property
   (property ([n (choose-integer #b-00011111 -1)])
-    (let ([out (open-output-bytes)])
-      (pack-n-fixint n out)
-      (bytes=? (get-output-bytes out)
-               (bytes (bitwise-ior #b11100000 (abs n)))))))
+    (bytes=? (call-with-output-bytes (λ (out) (pack-n-fixint n out)))
+             (bytes (bitwise-ior #b11100000 (abs n))))))

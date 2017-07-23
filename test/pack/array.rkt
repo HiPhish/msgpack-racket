@@ -30,26 +30,22 @@
 ;;; Fixed array
 (check-property
   (property ([len (choose-integer 0 #b00001111)])
-    (let ([out (open-output-bytes)]
-          [vec (make-vector len '())])
-      (pack-array vec out)
-      (let ([packed (get-output-bytes out)])
-        (and (= (bytes-length packed) (+ 1 (vector-length vec)))
-             (= (bytes-ref packed 0) (bitwise-ior #b10010000 len))
-             (for/and ([i (in-range 1 len)])
-               (= (bytes-ref packed i) #xC0)))))))
+    (let* ([vec    (make-vector len '())]
+           [packed (call-with-output-bytes (λ (out) (pack vec out)))])
+      (and (= (bytes-length packed) (+ 1 (vector-length vec)))
+           (= (bytes-ref packed 0) (bitwise-ior #b10010000 len))
+           (for/and ([i (in-range 1 len)])
+             (= (bytes-ref packed i) #xC0))))))
 
 ;;; Array16
 (check-property
   (property ([len (choose-integer 16 (sub1 (expt 2 16)))])
-    (let ([out (open-output-bytes)]
-          [vec (make-vector len '())])
-      (pack-array vec out)
-      (let ([packed (get-output-bytes out)])
-        (and (= (bytes-length packed) (+ 3 (vector-length vec)))
-             (= (bytes-ref packed 0) #xDC)
-             (for/and ([i (in-range 0 len)])
-               (= (bytes-ref packed (+ i 3)) #xC0)))))))
+    (let* ([vec    (make-vector len '())]
+           [packed (call-with-output-bytes (λ (out) (pack vec out)))])
+      (and (= (bytes-length packed) (+ 3 (vector-length vec)))
+           (= (bytes-ref packed 0) #xDC)
+           (for/and ([i (in-range 0 len)])
+             (= (bytes-ref packed (+ i 3)) #xC0))))))
 
 ;;; I cannot test larger array because my machine runs out of memory. If one
 ;;; one element is one byte large, 2^32 element would take up 4GiB.

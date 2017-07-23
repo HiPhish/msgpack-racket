@@ -27,25 +27,22 @@
 ;;; and once using the number converted to single precision.
 
 ;;; Predicate which adjusts to precision automatically.
-(define (packed-properly? f bstr)
+(define (packed-properly? f packed)
   (define tag  (if (single-flonum? f) #xCA #xCB))
   (define size (if (single-flonum? f)    4    8))
-  (bytes=?
-    (get-output-bytes bstr)
-    (bytes-append (bytes tag)
-                  (real->floating-point-bytes f size #t))))
+  (bytes=? packed
+           (bytes-append (bytes tag)
+                         (real->floating-point-bytes f size #t))))
 
 ;;; Double-precision
 (check-property
   (property ([f arbitrary-real])
-    (let ([out (open-output-bytes)])
-      (pack-float f out)
-      (packed-properly? f out))))
+    (let ([packed (call-with-output-bytes (λ (out) (pack-float f out)))])
+      (packed-properly? f packed))))
 
 ;;; Single-precision
 (check-property
   (property ([f arbitrary-real])
-    (let ([out  (open-output-bytes)]
-          [f    (real->single-flonum f)])
-      (pack-float f out)
-      (packed-properly? f out))))
+    (let* ([f (real->single-flonum f)]
+           [packed (call-with-output-bytes (λ (out) (pack-float f out)))])
+      (packed-properly? f packed))))

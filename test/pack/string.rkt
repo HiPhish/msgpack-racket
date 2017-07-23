@@ -32,36 +32,30 @@
 ;;; Fixed string
 (check-property
   (property ([n (choose-integer 0 #b00011111)])
-    (let ([out (open-output-bytes)]
-          [str (make-string n #\a)])
-      (pack-string str out)
-      (bytes=?
-        (get-output-bytes out)
-        (bytes-append (bytes (bitwise-ior #b10100000 n))
-                      (string->bytes/utf-8 str))))))
+    (let* ([str    (make-string n #\a)]
+           [packed (call-with-output-bytes (λ (out) (pack str out)))])
+      (bytes=? packed
+               (bytes-append (bytes (bitwise-ior #b10100000 n))
+                             (string->bytes/utf-8 str))))))
 
 ;;; String-8
 (check-property
   (property ([n (choose-integer #b00011111 (sub1 (expt 2 8)))])
-    (let ([out (open-output-bytes)]
-          [str (make-string n #\a)])
-      (pack-string str out)
-      (bytes=?
-        (get-output-bytes out)
-        (bytes-append (bytes #xD9 n)
-                      (string->bytes/utf-8 str))))))
+    (let* ([str    (make-string n #\a)]
+           [packed (call-with-output-bytes (λ (out) (pack str out)))])
+      (bytes=? packed
+               (bytes-append (bytes #xD9 n)
+                             (string->bytes/utf-8 str))))))
 
 ;;; String-16
 (check-property
   (property ([n (choose-integer (expt 2 8) (sub1 (expt 2 16)))])
-    (let ([out (open-output-bytes)]
-          [str (make-string n #\a)])
-      (pack-string str out)
-      (bytes=?
-        (get-output-bytes out)
-        (bytes-append (bytes #xDA)
-                      (integer->integer-bytes n 2 #f #t)
-                      (string->bytes/utf-8 str))))))
+    (let* ([str    (make-string n #\a)]
+           [packed (call-with-output-bytes (λ (out) (pack str out)))])
+      (bytes=? packed
+               (bytes-append (bytes #xDA)
+                             (integer->integer-bytes n 2 #f #t)
+                             (string->bytes/utf-8 str))))))
 
 ;;; I cannot test larger strings because my machine runs out of memory.
-;:: 2^16B is 64MiB, and 2^32 is 4GiB.
+;;; 2^16B is 64MiB, and 2^32 is 4GiB.

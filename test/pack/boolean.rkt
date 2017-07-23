@@ -26,10 +26,7 @@
 ;;; same for each value.
 (for ([val (in-list '(#f   #t))]
       [tag (in-list '(#xC2 #xC3))])
-  (for ([pack-func (in-list (list pack pack-boolean))])
-    (let ([out (open-output-bytes)])
-      (pack-func val out)
-      (check
-        bytes=?
-        (get-output-bytes out)
-        (bytes tag)))))
+  (for ([pack-f (in-list (list pack pack-boolean))])
+    (check
+      bytes=? (call-with-output-bytes (λ (out) (pack-f val out)))
+              (bytes tag))))

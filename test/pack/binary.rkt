@@ -23,25 +23,23 @@
   (file "../../msgpack/pack.rkt"))
 
 
+;;; Bin 8
 (check-property
   (property ([n (choose-integer 0 (sub1 (expt 2 8)))])
-    (let ([out (open-output-bytes)]
-          [bs  (make-bytes n)])
-      (pack-bin bs out)
-      (bytes=?
-        (get-output-bytes out)
-        (bytes-append (bytes #xC4 n) bs)))))
+    (let* ([bstr   (make-bytes n)]
+           [packed (call-with-output-bytes (λ (out) (pack bstr out)))])
+      (bytes=? packed
+               (bytes-append (bytes #xC4 n) bstr)))))
 
+;;; Bin 16
 (check-property
   (property ([n (choose-integer (expt 2 8) (sub1 (expt 2 16)))])
-    (let ([out (open-output-bytes)]
-          [bs  (make-bytes n)])
-      (pack-bin bs out)
-      (bytes=?
-        (get-output-bytes out)
-        (bytes-append (bytes #xC5)
-                      (integer->integer-bytes n 2 #f #t)
-                      bs)))))
+    (let* ([bstr   (make-bytes n)]
+           [packed (call-with-output-bytes (λ (out) (pack bstr out)))])
+      (bytes=? packed
+               (bytes-append (bytes #xC5)
+                             (integer->integer-bytes n 2 #f #t)
+                             bstr)))))
 
 ;;; I cannot test larger byte strings because my machine runs out of memory.
-;:: 2^16B is 64MiB, and 2^32B is 4GiB.
+;;; 2^16B is 64MiB, and 2^32B is 4GiB.
