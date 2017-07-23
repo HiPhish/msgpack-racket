@@ -50,6 +50,7 @@ The following cases cannot be tested for the time being:
 - The same goes for the `str32` type
 - The same goes for the `array32` type
 - The same goes for the `map32` type
+- The same goes for the `ext32` type
 - Strings are only tested using ASCII characters, if anyone can generate
   UTF-8 strings with a given length in *bytes* please help out.
 

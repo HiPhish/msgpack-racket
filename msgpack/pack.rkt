@@ -17,7 +17,7 @@
 ;;;;     <http://www.gnu.org/licenses/>.
 #lang racket
 
-(require (file "../main.rkt"))
+(require (file "main.rkt"))
 
 (provide 
   (contract-out
@@ -194,17 +194,19 @@
       [(uint8? len)
        (begin
          (write-byte #xC7 out)
-         (write-bytes (integer->bytes len) out))]
+         (write-bytes (integer->bytes len #f) out))]
       [(uint16? len)
        (begin
          (write-byte #xC8 out)
-         (write-bytes (integer->bytes len) out))]
+         (write-bytes (integer->bytes len #f) out))]
       [(uint32? len)
        (begin
          (write-byte #xC9 out)
-         (write-bytes (integer->bytes len) out))])
-    (write-byte  (ext-type ext) out)
-    (write-bytes (ext-data ext) out)))
+         (write-bytes (integer->bytes len #f) out))])
+    (let ([type (ext-type ext)]
+          [data (ext-data ext)])
+      (write-byte  (if (< type 0) (+ #x100 type) type) out)
+      (write-bytes data out))))
 
 
 ;;; === Helper functions ===
