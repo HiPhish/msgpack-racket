@@ -37,6 +37,14 @@ In the above example code we created a port from a byte string, but the port
 may be any kind of Racket port.
 
 
+Status
+######
+
+The library is fully functional and covered by test cases, but the API is not
+yet stabilised, changes are possible. See also below for parts of the library
+that could not be tested at the moment due to technical reasons.
+
+
 Caveats
 #######
 
