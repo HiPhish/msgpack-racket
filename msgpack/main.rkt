@@ -27,4 +27,4 @@
 
 (provide
   (contract-out
-    [struct ext ((type (and/c integer? (λ (i) (<= -128 i 127)))) (data bytes?))]))
+    [struct ext ((type (integer-in #x-80 #x7F)) (data bytes?))]))
