@@ -21,8 +21,7 @@
   rackunit
   (file "../../msgpack/pack.rkt"))
 
-;;; Specific function
-(check bytes=? (call-with-output-bytes (λ (out) (pack-nil out))) (bytes #xC0))
 
-;;; Generic function, requires an object to pack
-(check bytes=? (call-with-output-bytes (λ (out) (pack '() out))) (bytes #xC0))
+(check
+  bytes=? (bytes #xC0)
+          (call-with-output-bytes (λ (out) (pack '() out))))

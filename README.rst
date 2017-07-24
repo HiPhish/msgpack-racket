@@ -40,9 +40,6 @@ may be any kind of Racket port.
 Caveats
 #######
 
-The library is still early in development, technically the packing and
-unpacking routines have been written, but they are largely untested yet.
-
 The following cases cannot be tested for the time being:
 
 - The `bin32` type, storing a byte string that is :math:`2^32` bytes long

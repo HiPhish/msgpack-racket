@@ -17,15 +17,14 @@
 ;;;;     <http://www.gnu.org/licenses/>.
 #lang racket
 
-(module+ test
-  (require rackunit))
-
 (require "main.rkt")
+
 (provide
   (contract-out
     [unpack (-> (and/c input-port? (not/c port-closed?)) any/c)]))
 
-;;; Use type bytes to decide how to unpack the data; return extracted datum.
+
+;;; ===[ Generic unpacking ]==================================================
 (define (unpack in)
   (let ([tag (read-byte in)])
     (cond
@@ -33,14 +32,14 @@
       [(<= #x80 tag #x8F) (unpack-map    (bitwise-and #b00001111 tag) in)]
       [(<= #x90 tag #x9F) (unpack-array  (bitwise-and #b00001111 tag) in)]
       [(<= #xA0 tag #xBF) (unpack-string (bitwise-and #b00011111 tag) in)]
-      [(= #xC0 tag) '()]
-      [(= #xC1 tag) (error "0xC1 is never used")]
-      [(= #xC2 tag) #false]
-      [(= #xC3 tag) #true]
-      [(= #xC4 tag) (read-bytes (unpack-uint  8 in) in)]
-      [(= #xC5 tag) (read-bytes (unpack-uint 16 in) in)]
-      [(= #xC6 tag) (read-bytes (unpack-uint 32 in) in)]
-      [(= #xC7 tag) (unpack-ext (unpack-uint  8 in) in)]
+      [(= #xC0 tag) '()]  ; nil
+      [(= #xC1 tag) (error "MessagePack tag 0xC1 is never used")]
+      [(= #xC2 tag) #f]  ; false
+      [(= #xC3 tag) #t]  ; true
+      [(= #xC4 tag) (read-bytes (unpack-uint  8 in) in)]  ; bin8
+      [(= #xC5 tag) (read-bytes (unpack-uint 16 in) in)]  ; bin16
+      [(= #xC6 tag) (read-bytes (unpack-uint 32 in) in)]  ; bin32
+      [(= #xC7 tag) (unpack-ext (unpack-uint  8 in) in)]  ; bin64
       [(= #xC8 tag) (unpack-ext (unpack-uint 16 in) in)]
       [(= #xC9 tag) (unpack-ext (unpack-uint 32 in) in)]
       [(= #xCA tag) (unpack-float 32 in)]
@@ -65,29 +64,16 @@
       [(= #xDD tag) (unpack-array  (unpack-uint 32 in) in)]
       [(= #xDE tag) (unpack-map    (unpack-uint 16 in) in)]
       [(= #xDF tag) (unpack-map    (unpack-uint 32 in) in)]
-      [(<= #xE0 tag #xFF) (- tag #x100)]
+      [(<= #xE0 tag #xFF) (- tag #x100)]  ; negative fixint
       [else (error "Unknown tag")])))
 
-;;; --- Unpack individual types
+
+;;; ===[ Integers ]===========================================================
 (define (unpack-uint size in)
   (let ([bstr (read-bytes (/ size 8) in)])
     (if (= 1 (bytes-length bstr))
       (bytes-ref bstr 0)
       (integer-bytes->integer bstr #f #t))))
-
-(module+ test
-  (for ([bstr (in-list (list
-                         (bytes #x23)
-                         (bytes #x23 #x45)
-                         (bytes #x23 #x45 #x56 #x78)
-                         (bytes #x23 #x45 #x56 #x78 #x9A)))]
-        [uint (in-list (list
-                         #x23
-                         #x2345
-                         #x23455678
-                         #x234556789A))])
-    (check-= uint (unpack-uint (* (bytes-length bstr) 8) (open-input-bytes bstr)) 0)))
-
 
 (define (unpack-int size in)
   (let ([bstr (read-bytes (/ size 8) in)])
@@ -99,26 +85,31 @@
       (integer-bytes->integer bstr #t #t))))
 
 
+;;; ===[ Floating point numbers ]=============================================
 (define (unpack-float size in)
   (floating-point-bytes->real (read-bytes (/ size 8) in) #t))
 
 
+;;; ===[ Unicode strings ]====================================================
 (define (unpack-string size in)
   (let ((bstr (read-bytes size in)))
     (bytes->string/utf-8 bstr)))
 
 
+;;; ===[ Arrays ]=============================================================
 (define (unpack-array size in)
   (for/vector #:length size ([_ (in-range size)])
     (unpack in)))
 
 
+;;; ===[ Maps ]===============================================================
 (define (unpack-map size in)
   (for/hash ([_ (in-range size)])
     (values (unpack in)
             (unpack in))))
 
 
+;;; ===[ Extensions ]=========================================================
 (define (unpack-ext size in)
   (ext (unpack-int 8 in)
        (read-bytes size in)))

@@ -21,12 +21,12 @@
   rackunit
   (file "../../msgpack/pack.rkt"))
 
+
 ;;; There are two values and two functions: the generic 'pack' and the more
 ;;; specific 'pack-boolean'. We need to test that both functions perform the
 ;;; same for each value.
-(for ([val (in-list '(#f   #t))]
-      [tag (in-list '(#xC2 #xC3))])
-  (for ([pack-f (in-list (list pack pack-boolean))])
-    (check
-      bytes=? (call-with-output-bytes (λ (out) (pack-f val out)))
-              (bytes tag))))
+(for ([val (in-vector #(#f   #t  ))]
+      [tag (in-vector #(#xC2 #xC3))])
+  (check
+    bytes=? (bytes tag)
+            (call-with-output-bytes (λ (out) (pack val out)))))

@@ -22,6 +22,7 @@
   rackunit/quickcheck
   (file "../../msgpack/pack.rkt"))
 
+
 ;;; All floating point real numbers have double-precision by default in Racket.
 ;;; This means we have to test once using the regular arbitrary real number,
 ;;; and once using the number converted to single precision.
@@ -34,15 +35,13 @@
            (bytes-append (bytes tag)
                          (real->floating-point-bytes f size #t))))
 
-;;; Double-precision
 (check-property
   (property ([f arbitrary-real])
-    (let ([packed (call-with-output-bytes (λ (out) (pack-float f out)))])
-      (packed-properly? f packed))))
-
-;;; Single-precision
-(check-property
-  (property ([f arbitrary-real])
-    (let* ([f (real->single-flonum f)]
-           [packed (call-with-output-bytes (λ (out) (pack-float f out)))])
-      (packed-properly? f packed))))
+    (and
+      ;; Double precision
+      (let ([packed (call-with-output-bytes (λ (out) (pack f out)))])
+        (packed-properly? f packed)))
+      ;; Single precision
+      (let* ([f (real->single-flonum f)]
+             [packed (call-with-output-bytes (λ (out) (pack f out)))])
+        (packed-properly? f packed))))

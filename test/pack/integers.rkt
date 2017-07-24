@@ -24,70 +24,45 @@
   (file "../../msgpack/private/helpers.rkt"))
 
 
-;;; Generate a property which specifies that for a given size and sign the
-;;; integers are packed properly. The name of the packing function is generated
-;;; from a string and the 'signed?' template variable.
-(define-syntax (packs-integer stx)
-  (syntax-case stx ()
-    [(_ size signed? tag)
-     #`(property ([n (choose-integer
-                       (if signed? (- (expt 2 (sub1 size))) 0)
-                       (sub1 (expt 2 (if signed? (sub1 size) size))))])
-         (let ([packf #,(datum->syntax stx
-                          (string->symbol
-                            (format
-                              (if (syntax->datum #'signed?)
-                                "pack-int~a"
-                                "pack-uint~a")
-                              (syntax->datum #'size))))])
-           (bytes=? (call-with-output-bytes (λ (out) (packf n out)))
-                    (bytes-append
-                      (bytes tag)
-                      (integer->integer-bytes n (/ size 8) signed? #t)))))]))
+;;; Integers can be packed in many ways, we need to use these predicates to
+;;; narrow down the type
+(define (uint8?  i) (<= 0 i (sub1 (expt 2  8))))
+(define (uint16? i) (<= 0 i (sub1 (expt 2 16))))
+(define (uint32? i) (<= 0 i (sub1 (expt 2 32))))
+(define (uint64? i) (<= 0 i (sub1 (expt 2 64))))
 
-;;; 8-bit integers are a more complicated case because we cannot use
-;;; integer->integer-bytes and we have to avoid stepping into the range of the
-;;; "fixnum" types.
-(define-syntax (packs-integer8 stx)
-  (syntax-case stx ()
-    [(_ signed? tag)
-     #`(property ([n (choose-integer
-                       (if signed?
-                         (- (expt 2 7))
-                         128)
-                       (if signed?
-                         -33
-                         (sub1 (expt 2 8))))])
-         (let ([packf #,(datum->syntax stx
-                          (string->symbol
-                            (if (syntax->datum #'signed?)
-                              "pack-int8"
-                              "pack-uint8")))])
-           (bytes=?
-             (call-with-output-bytes (λ (out) (packf n out)))
-             (bytes-append
-               (bytes tag)
-               (bytes (if signed? (int8->byte n) n))))))]))
+(define (int8?  i) (<= (- (expt 2  7)) i))
+(define (int16? i) (<= (- (expt 2 15)) i))
+(define (int32? i) (<= (- (expt 2 31)) i))
+(define (int64? i) (<= (- (expt 2 63)) i))
 
-(check-property (packs-integer 16 #t #xD1))
-(check-property (packs-integer 32 #t #xD2))
-(check-property (packs-integer 64 #t #xD3))
 
-(check-property (packs-integer 16 #f #xCD))
-(check-property (packs-integer 32 #f #xCE))
-(check-property (packs-integer 64 #f #xCF))
-
-(check-property (packs-integer8 #t #xD0))
-(check-property (packs-integer8 #f #xCC))
-
-;;; Check positive "fixnum" types separately
-(check-property
-  (property ([n (choose-integer 0 #b01111111)])
-    (bytes=? (call-with-output-bytes (λ (out) (pack-p-fixint n out)))
-             (bytes n))))
-
-;;; Check negative "fixnum" types separately
-(check-property
-  (property ([n (choose-integer -32 -1)])
-    (bytes=? (call-with-output-bytes (λ (out) (pack-n-fixint n out)))
-             (bytes (int8->byte n)))))
+(with-medium-test-count
+  (check-property
+    ;; The total possible range for an integer is from the minimum value of an
+    ;; int64 to the maximum value of a uint64.
+    (property ([i (choose-integer (- (expt 2 63)) (sub1 (expt 2 64)))])
+      (bytes=? (call-with-output-bytes (λ (out) (pack i out)))
+               (cond [(<= 0 i  127) (bytes i)]
+                     [(<= -32 i -1) (bytes (int8->byte i))]
+                     [(uint8?  i) (bytes #xCC i)]
+                     [(uint16? i)
+                      (bytes-append (bytes #xCD)
+                                    (integer->integer-bytes i 2 #f #t))]
+                     [(uint32? i)
+                      (bytes-append (bytes #xCE)
+                                    (integer->integer-bytes i 4 #f #t))]
+                     [(uint64? i)
+                      (bytes-append (bytes #xCF)
+                                    (integer->integer-bytes i 8 #f #t))]
+                     [(int8?  i) (bytes #xD0 (int8->byte i))]
+                     [(int16? i)
+                      (bytes-append (bytes #xD1)
+                                    (integer->integer-bytes i 2 #t #t))]
+                     [(int32? i)
+                      (bytes-append (bytes #xD2)
+                                    (integer->integer-bytes i 4 #t #t))]
+                     [(int64? i)
+                      (bytes-append (bytes #xD3)
+                                    (integer->integer-bytes i 8 #t #t))]
+                     [else (error "Number " i " outside range in test.")])))))
