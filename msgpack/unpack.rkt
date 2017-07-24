@@ -65,7 +65,7 @@
       [(= #xDD tag) (unpack-array  (unpack-uint 32 in) in)]
       [(= #xDE tag) (unpack-map    (unpack-uint 16 in) in)]
       [(= #xDF tag) (unpack-map    (unpack-uint 32 in) in)]
-      [(<= #xE0 tag #xFF) (- (bitwise-and tag #b00011111) (expt 2 5))]
+      [(<= #xE0 tag #xFF) (- tag #x100)]
       [else (error "Unknown tag")])))
 
 ;;; --- Unpack individual types

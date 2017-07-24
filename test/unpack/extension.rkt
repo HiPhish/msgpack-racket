@@ -21,11 +21,9 @@
   quickcheck
   rackunit/quickcheck
   (file "../../msgpack/main.rkt")
-  (file "../../msgpack/unpack.rkt"))
+  (file "../../msgpack/unpack.rkt")
+  (file "../../msgpack/private/helpers.rkt"))
 
-
-;;; A little helper function
-(define (int8->byte i) (if (< i 0) (+ #x100 i) i))
 
 ;;; The type part of an ext is a signed 8-bit integer, i.e. a number between
 ;;; -2^7 and (2^7)-1.

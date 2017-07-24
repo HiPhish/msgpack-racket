@@ -20,7 +20,8 @@
 (require
   quickcheck
   rackunit/quickcheck
-  (file "../../msgpack/pack.rkt"))
+  (file "../../msgpack/pack.rkt")
+  (file "../../msgpack/private/helpers.rkt"))
 
 
 ;;; Generate a property which specifies that for a given size and sign the
@@ -53,9 +54,9 @@
      #`(property ([n (choose-integer
                        (if signed?
                          (- (expt 2 7))
-                         #b10000000)
+                         128)
                        (if signed?
-                         #b-00011111
+                         -33
                          (sub1 (expt 2 8))))])
          (let ([packf #,(datum->syntax stx
                           (string->symbol
@@ -66,7 +67,7 @@
              (call-with-output-bytes (λ (out) (packf n out)))
              (bytes-append
                (bytes tag)
-               (bytes (if signed? (bitwise-ior (if (< n 0) #x80 #x00) (abs n)) n))))))]))
+               (bytes (if signed? (int8->byte n) n))))))]))
 
 (check-property (packs-integer 16 #t #xD1))
 (check-property (packs-integer 32 #t #xD2))
@@ -87,6 +88,6 @@
 
 ;;; Check negative "fixnum" types separately
 (check-property
-  (property ([n (choose-integer #b-00011111 -1)])
+  (property ([n (choose-integer -32 -1)])
     (bytes=? (call-with-output-bytes (λ (out) (pack-n-fixint n out)))
-             (bytes (bitwise-ior #b11100000 (abs n))))))
+             (bytes (int8->byte n)))))

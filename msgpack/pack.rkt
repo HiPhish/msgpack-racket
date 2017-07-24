@@ -18,6 +18,7 @@
 #lang racket
 
 (require (file "main.rkt"))
+(require (file "private/helpers.rkt"))
 
 (provide 
   (contract-out
@@ -65,7 +66,7 @@
 (define (int32?   x) (and (exact-integer? x) (<= (- (expt 2 31)) x (- (expt 2 31) 1))))
 (define (int64?   x) (and (exact-integer? x) (<= (- (expt 2 63)) x (- (expt 2 63) 1))))
 (define (+fixint? x) (and (exact-nonnegative-integer? x) (<= x #b01111111)))
-(define (-fixint? x) (and (exact-integer? x) (negative? x) (>= x #b-00011111)))
+(define (-fixint? x) (and (exact-integer? x) (negative? x) (<= -32 x -1)))
 
 (define (pack datum out)
   (cond
@@ -102,7 +103,7 @@
   (if (-fixint? int)
      ;; int is always negative and > -32, so convert to positive and OR with
      ;; the prefix
-     (write-bytes (bitwise-ior #b11100000 (abs int)))
+     (write-bytes (bytes (int8->byte int)))
      (begin
        (cond
         [(int8?  int) (write-byte #xD0 out)]
@@ -116,7 +117,7 @@
   (write-byte i out))
 
 (define (pack-n-fixint i out)
-  (write-byte (bitwise-ior #b11100000 (abs i)) out))
+  (write-byte (int8->byte i) out))
 
 (define (pack-uint8  i out) (pack-uint i out))
 (define (pack-uint16 i out) (pack-uint i out))
@@ -205,7 +206,7 @@
          (write-bytes (integer->bytes len #f) out))])
     (let ([type (ext-type ext)]
           [data (ext-data ext)])
-      (write-byte  (if (< type 0) (+ #x100 type) type) out)
+      (write-byte  (int8->byte type) out)
       (write-bytes data out))))
 
 
@@ -226,10 +227,10 @@
         [(uint64? int) 8])))
   (if signed?
     (cond
-      [(int8?  int) (bytes (if (< int 0) (bitwise-ior #b10000000 (abs int)) int))]
+      [(int8?  int) (bytes (int8->byte int))]
       [(int64? int) (integer->integer-bytes int (number-of-bytes) #t #t)]
-      [else (error "Signed integers may not be large than 8 bytes")])
+      [else (error "Signed integers may not be larger than 8 bytes")])
     (cond
       [(uint8?  int) (bytes int)]
       [(uint64? int) (integer->integer-bytes int (number-of-bytes) #f #t)]
-      [else (error "Unsigned integers may not be large than 8 bytes")])))
+      [else (error "Unsigned integers may not be larger than 8 bytes")])))
