@@ -15,9 +15,10 @@
 ;;;;     You should have received a copy of the GNU General Public License
 ;;;;     along with MessagePack.rkt.  If not, see
 ;;;;     <http://www.gnu.org/licenses/>.
-#lang racket
+#lang racket/base
 
-(require "main.rkt")
+(require racket/contract/base
+         (file "main.rkt"))
 
 (provide
   (contract-out

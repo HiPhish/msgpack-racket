@@ -15,14 +15,14 @@
 ;;;;     You should have received a copy of the GNU General Public License
 ;;;;     along with MessagePack.rkt.  If not, see
 ;;;;     <http://www.gnu.org/licenses/>.
-#lang racket
+#lang racket/base
 
-(require
-  quickcheck
-  rackunit/quickcheck
-  (file "../../msgpack/main.rkt")
-  (file "../../msgpack/unpack.rkt")
-  (file "../../msgpack/private/helpers.rkt"))
+(require racket/port
+         quickcheck
+         rackunit/quickcheck
+         (file "../../msgpack/main.rkt")
+         (file "../../msgpack/unpack.rkt")
+         (file "../../msgpack/private/helpers.rkt"))
 
 
 ;;; The type part of an ext is a signed 8-bit integer, i.e. a number between

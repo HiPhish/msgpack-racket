@@ -15,12 +15,12 @@
 ;;;;     You should have received a copy of the GNU General Public License
 ;;;;     along with MessagePack.rkt.  If not, see
 ;;;;     <http://www.gnu.org/licenses/>.
-#lang racket
+#lang racket/base
 
-(require
-  quickcheck
-  rackunit/quickcheck
-  (file "../../msgpack/pack.rkt"))
+(require racket/port
+         quickcheck
+         rackunit/quickcheck
+         (file "../../msgpack/pack.rkt"))
 
 
 ;;; For every vector we need to pack the vector as well as its contents. We

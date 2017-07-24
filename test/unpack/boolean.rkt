@@ -15,11 +15,11 @@
 ;;;;     You should have received a copy of the GNU General Public License
 ;;;;     along with MessagePack.rkt.  If not, see
 ;;;;     <http://www.gnu.org/licenses/>.
-#lang racket
+#lang racket/base
 
-(require
-  rackunit
-  (file "../../msgpack/unpack.rkt"))
+(require racket/port
+         rackunit
+         (file "../../msgpack/unpack.rkt"))
 
 
 (check-false (call-with-input-bytes (bytes #xC2) (λ (in) (unpack in))))

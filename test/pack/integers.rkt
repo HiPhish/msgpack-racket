@@ -15,13 +15,13 @@
 ;;;;     You should have received a copy of the GNU General Public License
 ;;;;     along with MessagePack.rkt.  If not, see
 ;;;;     <http://www.gnu.org/licenses/>.
-#lang racket
+#lang racket/base
 
-(require
-  quickcheck
-  rackunit/quickcheck
-  (file "../../msgpack/pack.rkt")
-  (file "../../msgpack/private/helpers.rkt"))
+(require racket/port
+         quickcheck
+         rackunit/quickcheck
+         (file "../../msgpack/pack.rkt")
+         (file "../../msgpack/private/helpers.rkt"))
 
 
 ;;; Integers can be packed in many ways, we need to use these predicates to

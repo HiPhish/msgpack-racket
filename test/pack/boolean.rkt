@@ -15,11 +15,11 @@
 ;;;;     You should have received a copy of the GNU General Public License
 ;;;;     along with MessagePack.rkt.  If not, see
 ;;;;     <http://www.gnu.org/licenses/>.
-#lang racket
+#lang racket/base
 
-(require
-  rackunit
-  (file "../../msgpack/pack.rkt"))
+(require racket/port
+         rackunit
+         (file "../../msgpack/pack.rkt"))
 
 
 ;;; There are two values and two functions: the generic 'pack' and the more

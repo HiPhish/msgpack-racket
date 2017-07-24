@@ -15,12 +15,12 @@
 ;;;;     You should have received a copy of the GNU General Public License
 ;;;;     along with MessagePack.rkt.  If not, see
 ;;;;     <http://www.gnu.org/licenses/>.
-#lang racket
+#lang racket/base
 
-(require
-  quickcheck
-  rackunit/quickcheck
-  (file "../../msgpack/unpack.rkt"))
+(require racket/port
+         quickcheck
+         rackunit/quickcheck
+         (file "../../msgpack/unpack.rkt"))
 
 ;;; There is a little trick to convert a negative number to its 2's complement
 ;;; byte: add the negative number to 256 or #x100

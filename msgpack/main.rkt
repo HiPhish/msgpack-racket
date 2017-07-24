@@ -15,7 +15,9 @@
 ;;;;     You should have received a copy of the GNU General Public License
 ;;;;     along with MessagePack.rkt.  If not, see
 ;;;;     <http://www.gnu.org/licenses/>.
-#lang racket
+#lang racket/base
+
+(require racket/contract/base)
 
 
 ;;; The MessagePack ext type does not have a direct correspondence to a Racket
