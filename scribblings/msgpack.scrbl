@@ -61,7 +61,7 @@ to the following rules:
         (list "bin 32"            'cont)
         (list "float 16"          @racket[real])
         (list "float 32"          'cont)
-        (list "fixarray"          @racket[vector])
+        (list "fixarray"          @racket[vector list])
         (list "array 16"          'cont)
         (list "array 32"          'cont)
         (list "fixmap"            @racket[hash])

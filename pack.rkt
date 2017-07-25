@@ -43,6 +43,7 @@
     [(string?         datum) (pack-string  datum    out)]
     [(bytes?          datum) (pack-bytes   datum    out)]
     [(vector?         datum) (pack-vector  datum    out)]
+    [(list?           datum) (pack-list    datum    out)]
     [(hash?           datum) (pack-hash    datum    out)]
     [(ext?            datum) (pack-ext     datum    out)]
     [else (error "Type of " datum " not supported by MessagePack")]))
@@ -133,7 +134,13 @@
 
 ;;; ===[ Arrays ]=============================================================
 (define (pack-vector vec out)
-  (define len (vector-length vec))
+  (pack-sequence vec out vector-length in-vector))
+
+(define (pack-list lst out)
+  (pack-sequence lst out length in-list))
+
+(define (pack-sequence seq out len-f in-seq)
+  (define len (len-f seq))
   (cond
     [(<= len #b00001111)
      (write-byte (bitwise-ior len #b10010000) out)]
@@ -141,9 +148,9 @@
       (cond
         [(uint16? len) (write-byte #xDC out)]
         [(uint32? len) (write-byte #xDD out)]
-        [else (error "A vector may contain at most 2^32 - 1 items")])
+        [else (error "A sequence may contain at most 2^32 - 1 items")])
       (write-bytes (integer->bytes len #f) out)])
-  (for ([item (in-vector vec)])
+  (for ([item (in-seq seq)])
     (pack item out)))
 
 
