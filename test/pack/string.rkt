@@ -21,7 +21,7 @@
          quickcheck
          rackunit/quickcheck
          (file "../../msgpack/private/helpers.rkt")
-         (file "../../msgpack/pack.rkt"))
+         (file "../../msgpack/main.rkt"))
 
 
 ;;; This is only testing ASCII strings, what I would need would be to generate

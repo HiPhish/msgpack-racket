@@ -20,7 +20,7 @@
 (require racket/port
          quickcheck
          rackunit/quickcheck
-         (file "../../msgpack/pack.rkt"))
+         (file "../../msgpack/main.rkt"))
 
 
 ;;; For every vector we need to pack the vector as well as its contents. We

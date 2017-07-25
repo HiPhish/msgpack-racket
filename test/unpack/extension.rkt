@@ -21,7 +21,6 @@
          quickcheck
          rackunit/quickcheck
          (file "../../msgpack/main.rkt")
-         (file "../../msgpack/unpack.rkt")
          (file "../../msgpack/private/helpers.rkt"))
 
 

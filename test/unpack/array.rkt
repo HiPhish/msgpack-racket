@@ -20,7 +20,7 @@
 (require racket/port
          quickcheck
          rackunit/quickcheck
-         (file "../../msgpack/unpack.rkt"))
+         (file "../../msgpack/main.rkt"))
 
 ;;; Fixed array
 (check-property

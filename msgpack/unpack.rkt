@@ -18,7 +18,7 @@
 #lang racket/base
 
 (require racket/contract/base
-         (file "main.rkt")
+         (file "ext.rkt")
          (file "private/helpers.rkt"))
 
 (provide

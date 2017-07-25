@@ -20,7 +20,7 @@
 (require racket/port
          quickcheck
          rackunit/quickcheck
-         (file "../../msgpack/pack.rkt"))
+         (file "../../msgpack/main.rkt"))
 
 
 ;;; All floating point real numbers have double-precision by default in Racket.

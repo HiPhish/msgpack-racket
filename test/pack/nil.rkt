@@ -19,7 +19,7 @@
 
 (require racket/port
          rackunit
-         (file "../../msgpack/pack.rkt"))
+         (file "../../msgpack/main.rkt"))
 
 
 (check

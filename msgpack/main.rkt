@@ -17,14 +17,13 @@
 ;;;;     <http://www.gnu.org/licenses/>.
 #lang racket/base
 
-(require racket/contract/base)
-
-
-;;; The MessagePack ext type does not have a direct correspondence to a Racket
-;;; type.
-(struct ext (type data))
+(require racket/contract/base
+         (file "ext.rkt")
+         (file "pack.rkt")
+         (file "unpack.rkt"))
 
 
 (provide
-  (contract-out
-    [struct ext ((type (integer-in #x-80 #x7F)) (data bytes?))]))
+  (all-from-out (file "ext.rkt")
+                (file "pack.rkt")
+                (file "unpack.rkt")))

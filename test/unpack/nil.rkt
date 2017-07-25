@@ -19,7 +19,7 @@
 
 (require racket/port
          rackunit
-         (file "../../msgpack/unpack.rkt"))
+         (file "../../msgpack/main.rkt"))
 
 (check-eq? '()
            (call-with-input-bytes (bytes #xC0) (λ (in) (unpack in))))

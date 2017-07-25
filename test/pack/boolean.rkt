@@ -19,7 +19,7 @@
 
 (require racket/port
          rackunit
-         (file "../../msgpack/pack.rkt"))
+         (file "../../msgpack/main.rkt"))
 
 
 ;;; There are two values and two functions: the generic 'pack' and the more

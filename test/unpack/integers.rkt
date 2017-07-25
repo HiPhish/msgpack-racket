@@ -20,7 +20,7 @@
 (require racket/port
          quickcheck
          rackunit/quickcheck
-         (file "../../msgpack/unpack.rkt")
+         (file "../../msgpack/main.rkt")
          (file "../../msgpack/private/helpers.rkt"))
 
 ;;; There is a little trick to convert a negative number to its 2's complement

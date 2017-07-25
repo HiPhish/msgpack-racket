@@ -17,22 +17,13 @@
 ;;;;     <http://www.gnu.org/licenses/>.
 #lang racket/base
 
-(require racket/port
-         quickcheck
-         rackunit/quickcheck
-         (file "../../msgpack/main.rkt"))
+(require racket/contract/base)
 
 
-;;; Fixed map, Map 16
-(for ([size (in-vector (vector #b00001111 (sub1 (expt 2 16))))])
-  (check-property
-    (property ([n (choose-integer 0 size)])
-      (let* ([hash     (for/hash ([i (in-range 0 n)]) (values i i))]
-             [packed   (call-with-output-bytes       (λ (out) (pack hash out)))]
-             [unpacked (call-with-input-bytes packed (λ (in)  (unpack in)))])
-        (and (equal? hash unpacked)
-             )))))
+;;; The MessagePack ext type does not have a direct correspondence to a Racket
+;;; type.
+(struct ext (type data))
 
-;;; I cannot test larger maps because my machine runs out of memory. If one
-;;; one key or value is one byte large, 2^32 key-value pairs would take up
-;;; 8GiB.
+(provide
+  (contract-out
+    [struct ext ((type (integer-in #x-80 #x7F)) (data bytes?))]))
