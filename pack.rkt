@@ -34,21 +34,22 @@
 ;;; ===[ Generic packing ]====================================================
 (define (pack datum out)
   (cond
-    [(null?    datum) (pack-nil           out)]
-    [(boolean? datum) (pack-boolean datum out)]
-    [(exact-integer? datum) ((if (< datum 0) pack-int pack-uint) datum out)]
-    [(real?    datum) (pack-float   datum out)]
-    [(flonum?  datum) (pack-float   datum out)]
-    [(string?  datum) (pack-string  datum out)]
-    [(bytes?   datum) (pack-bin     datum out)]
-    [(vector?  datum) (pack-array   datum out)]
-    [(hash?    datum) (pack-map     datum out)]
-    [(ext?     datum) (pack-ext     datum out)]
-    [else (error "Type not supported by MessagePack")]))
+    [(null?           datum) (pack-null             out)]
+    [(boolean?        datum) (pack-boolean datum    out)]
+    [(exact-integer?  datum) (pack-integer datum    out)]
+    [(single-flonum?  datum) (pack-flonum  datum #t out)]
+    [(flonum?         datum) (pack-flonum  datum #f out)]
+    [(real?           datum) (pack-flonum  datum #t out)]
+    [(string?         datum) (pack-string  datum    out)]
+    [(bytes?          datum) (pack-bytes   datum    out)]
+    [(vector?         datum) (pack-vector  datum    out)]
+    [(hash?           datum) (pack-hash    datum    out)]
+    [(ext?            datum) (pack-ext     datum    out)]
+    [else (error "Type of " datum " not supported by MessagePack")]))
 
 
 ;;; ===[ Nil ]================================================================
-(define (pack-nil out)
+(define (pack-null out)
   (write-byte #xC0 out))
 
 
@@ -69,6 +70,9 @@
 (define (int16?   x) (and (exact-integer? x) (<= (- (expt 2 15)) x (sub1 (expt 2 15)))))
 (define (int32?   x) (and (exact-integer? x) (<= (- (expt 2 31)) x (sub1 (expt 2 31)))))
 (define (int64?   x) (and (exact-integer? x) (<= (- (expt 2 63)) x (sub1 (expt 2 63)))))
+
+(define (pack-integer i out)
+  (if (< i 0) (pack-int i out) (pack-uint i out)))
 
 (define (pack-uint uint out)
   (cond
@@ -94,96 +98,95 @@
 
 
 ;;; ===[ Floating point numbers ]=============================================
-(define (pack-float datum out)
-  (let ([single (single-flonum? datum)])
-    (write-byte (if single #xCA #xCB) out)
-    (write-bytes (real->floating-point-bytes datum (if single 4 8) #t) out)))
+(define (pack-flonum f single? out)
+  (write-byte (if single? #xCA #xCB) out)
+  (write-bytes (real->floating-point-bytes f (if single? 4 8) #t) out))
 
 
 ;;; ===[ Unicode strings ]====================================================
 (define (pack-string str out)
+  (define len (bytes-length (string->bytes/utf-8 str)))
   (define (pack-str-n len tag)
     (write-byte tag out)
     (write-bytes (integer->bytes len #f) out))
-  (let ([len (bytes-length (string->bytes/utf-8 str))])
-    (cond
-      [(<= len #b00011111)
-       (write-byte (bitwise-ior len #b10100000) out)]
-      [(uint8?  len) (pack-str-n len #xD9)]
-      [(uint16? len) (pack-str-n len #xDA)]
-      [(uint32? len) (pack-str-n len #xDB)]
-      [else (error "String may only be up to 2^32 - 1 bytes long")])
-    (write-bytes (string->bytes/utf-8 str) out)))
+  (cond
+    [(<= len #b00011111)
+     (write-byte (bitwise-ior len #b10100000) out)]
+    [(uint8?  len) (pack-str-n len #xD9)]
+    [(uint16? len) (pack-str-n len #xDA)]
+    [(uint32? len) (pack-str-n len #xDB)]
+    [else (error "String may only be up to 2^32 - 1 bytes long")])
+  (write-bytes (string->bytes/utf-8 str) out))
 
 
 ;;; ===[ Binary strings ]=====================================================
-(define (pack-bin bin out)
-  (let ([len (bytes-length bin)])
-    (cond
-      [(uint8?  len) (write-byte #xC4 out)]
-      [(uint16? len) (write-byte #xC5 out)]
-      [(uint32? len) (write-byte #xC6 out)]
-      [else (error "Byte string may only be up to 2^32 - 1 bytes long")])
-    (write-bytes (integer->bytes len #f) out)
-    (write-bytes bin out)))
+(define (pack-bytes bstr out)
+  (define len (bytes-length bstr))
+  (cond
+    [(uint8?  len) (write-byte #xC4 out)]
+    [(uint16? len) (write-byte #xC5 out)]
+    [(uint32? len) (write-byte #xC6 out)]
+    [else (error "Byte string may only be up to 2^32 - 1 bytes long")])
+  (write-bytes (integer->bytes len #f) out)
+  (write-bytes bstr out))
 
 
 ;;; ===[ Arrays ]=============================================================
-(define (pack-array arr out)
-  (let ([len (vector-length arr)])
-    (if (<= len #b00001111)
-      (write-byte (bitwise-ior len #b10010000) out)
-      (begin
-        (cond
-          [(uint16? len) (write-byte #xDC out)]
-          [(uint32? len) (write-byte #xDD out)]
-          [else (error "An array may contain at most 2^32 - 1 items")])
-        (write-bytes (integer->bytes len #f) out)))
-    (for ([item (in-vector arr)])
-      (pack item out))))
+(define (pack-vector vec out)
+  (define len (vector-length vec))
+  (cond
+    [(<= len #b00001111)
+     (write-byte (bitwise-ior len #b10010000) out)]
+    [else
+      (cond
+        [(uint16? len) (write-byte #xDC out)]
+        [(uint32? len) (write-byte #xDD out)]
+        [else (error "A vector may contain at most 2^32 - 1 items")])
+      (write-bytes (integer->bytes len #f) out)])
+  (for ([item (in-vector vec)])
+    (pack item out)))
 
 
 ;;; ===[ Maps ]===============================================================
-(define (pack-map m out)
-  (let ([len (hash-count m)])
-    (if (<= len #b00001111)
-      (write-byte (bitwise-ior len #b10000000) out)
-      (begin
-        (cond
-          [(uint16? len) (write-byte #xDE out)]
-          [(uint32? len) (write-byte #xDF out)]
-          [else (error "An map may contain at most 2^32 - 1 items")])
-        (write-bytes (integer->bytes len #f) out)))
-    (for ([(key value) (in-hash m)])
-      (pack key   out)
-      (pack value out))))
+(define (pack-hash hash out)
+  (define len (hash-count hash))
+  (cond
+    [(<= len #b00001111)
+     (write-byte (bitwise-ior len #b10000000) out)]
+    [else
+      (cond
+        [(uint16? len) (write-byte #xDE out)]
+        [(uint32? len) (write-byte #xDF out)]
+        [else (error "An map may contain at most 2^32 - 1 items")])
+      (write-bytes (integer->bytes len #f) out)])
+  (for ([(key value) (in-hash hash)])
+    (pack key   out)
+    (pack value out)))
 
 
 ;;; ===[ Extensions ]=========================================================
 (define (pack-ext ext out)
-  (let ([len (bytes-length (ext-data ext))])
-    (cond
-      [(= len  1) (write-byte #xD4 out)]
-      [(= len  2) (write-byte #xD5 out)]
-      [(= len  4) (write-byte #xD6 out)]
-      [(= len  8) (write-byte #xD7 out)]
-      [(= len 16) (write-byte #xD8 out)]
-      [(uint8? len)
-       (begin
-         (write-byte #xC7 out)
-         (write-bytes (integer->bytes len #f) out))]
-      [(uint16? len)
-       (begin
-         (write-byte #xC8 out)
-         (write-bytes (integer->bytes len #f) out))]
-      [(uint32? len)
-       (begin
-         (write-byte #xC9 out)
-         (write-bytes (integer->bytes len #f) out))])
-    (let ([type (ext-type ext)]
-          [data (ext-data ext)])
-      (write-bytes (integer->integer-bytes* type 1 #t #t) out)
-      (write-bytes data out))))
+  (define len (bytes-length (ext-data ext)))
+  (cond
+    [(= len  1) (write-byte #xD4 out)]
+    [(= len  2) (write-byte #xD5 out)]
+    [(= len  4) (write-byte #xD6 out)]
+    [(= len  8) (write-byte #xD7 out)]
+    [(= len 16) (write-byte #xD8 out)]
+    [(uint8? len)
+     (begin
+       (write-byte #xC7 out)
+       (write-bytes (integer->bytes len #f) out))]
+    [(uint16? len)
+     (begin
+       (write-byte #xC8 out)
+       (write-bytes (integer->bytes len #f) out))]
+    [(uint32? len)
+     (begin
+       (write-byte #xC9 out)
+       (write-bytes (integer->bytes len #f) out))])
+  (write-bytes (integer->integer-bytes* (ext-type ext) 1 #t #t) out)
+  (write-bytes (ext-data ext) out))
 
 
 ;;; ===[ Helper functions ]===================================================
@@ -192,6 +195,8 @@
 ;;; Ideally we would use 'integer->integer-bytes', but that function does not
 ;;; support 8-bit integers, so we need this for the time being.
 (define (integer->bytes int signed?)
+  (unless (if signed? (int64? int) (uint64? int))
+    (error "Integer " int "is larger than 64-bit."))
   (define (number-of-bytes)
     (if signed?
       (cond [(int8?  int) 1]
@@ -202,8 +207,4 @@
             [(uint16? int) 2]
             [(uint32? int) 4]
             [(uint64? int) 8])))
-  (if signed?
-    (cond [(int64? int) (integer->integer-bytes* int (number-of-bytes) #t #t)]
-          [else (error "Signed integers may not be larger than 8 bytes")])
-    (cond [(uint64? int) (integer->integer-bytes* int (number-of-bytes) #f #t)]
-          [else (error "Unsigned integers may not be larger than 8 bytes")])))
+  (integer->integer-bytes* int (number-of-bytes) signed? #t))

@@ -82,8 +82,7 @@
 
 ;;; ===[ Unicode strings ]====================================================
 (define (unpack-string size in)
-  (let ((bstr (read-bytes size in)))
-    (bytes->string/utf-8 bstr)))
+  (bytes->string/utf-8 (read-bytes size in)))
 
 
 ;;; ===[ Arrays ]=============================================================
@@ -101,5 +100,4 @@
 
 ;;; ===[ Extensions ]=========================================================
 (define (unpack-ext size in)
-  (ext (unpack-integer 8 #t in)
-       (read-bytes size in)))
+  (ext (unpack-integer 8 #t in) (read-bytes size in)))
