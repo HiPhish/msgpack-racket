@@ -20,6 +20,7 @@
 (require racket/port
          quickcheck
          rackunit/quickcheck
+         (file "../../msgpack/private/helpers.rkt")
          (file "../../msgpack/pack.rkt"))
 
 
@@ -38,24 +39,18 @@
                (bytes-append (bytes (bitwise-ior #b10100000 n))
                              (string->bytes/utf-8 str))))))
 
-;;; String-8
-(check-property
-  (property ([n (choose-integer #b00011111 (sub1 (expt 2 8)))])
-    (let* ([str    (make-string n #\a)]
-           [packed (call-with-output-bytes (λ (out) (pack str out)))])
-      (bytes=? packed
-               (bytes-append (bytes #xD9 n)
-                             (string->bytes/utf-8 str))))))
-
-;;; String-16
-(check-property
-  (property ([n (choose-integer (expt 2 8) (sub1 (expt 2 16)))])
-    (let* ([str    (make-string n #\a)]
-           [packed (call-with-output-bytes (λ (out) (pack str out)))])
-      (bytes=? packed
-               (bytes-append (bytes #xDA)
-                             (integer->integer-bytes n 2 #f #t)
-                             (string->bytes/utf-8 str))))))
+(for ([size  (in-vector #(8 16))]
+      [lower (in-vector (vector #b00011111 (expt 2 8)))]
+      [upper (in-vector (vector (sub1 (expt 2 8)) (sub1 (expt 2 16))))]
+      [tag   (in-naturals #xD9)])
+  (check-property
+    (property ([n (choose-integer lower upper)])
+      (let* ([str    (make-string n #\a)]
+             [packed (call-with-output-bytes (λ (out) (pack str out)))])
+        (bytes=? packed
+                 (bytes-append (bytes tag)
+                               (integer->integer-bytes* n (/ size 8) #f #t)
+                               (string->bytes/utf-8 str)))))))
 
 ;;; I cannot test larger strings because my machine runs out of memory.
 ;;; 2^16B is 64MiB, and 2^32 is 4GiB.

@@ -29,41 +29,34 @@
 ;;; -2^7 and (2^7)-1.
 
 ;;; Fixed ext
-(for ([n   (in-vector #(1 2 4 8 16))]
-      [tag (in-naturals #xD4)])
+(for ([size (in-vector #(1 2 4 8 16))]
+      [tag  (in-naturals #xD4)])
   (check-property
     (property ([type (choose-integer (- (expt 2 7)) (sub1 (expt 2 7)))])
-      (let* ([data (make-bytes n)]
+      (let* ([data (make-bytes size)]
              [packed (bytes-append (bytes tag (int8->byte type)) data)]
              [unpacked (call-with-input-bytes packed (λ (in) (unpack in)))])
         (and (ext? unpacked)
              (= type (ext-type unpacked))
              (bytes=? data (ext-data unpacked)))))))
 
-;;; Ext 8
-(check-property
-  (property ([type (choose-integer (- (expt 2 7)) (sub1 (expt 2 7)))]
-             [n    (choose-integer              0 (sub1 (expt 2 8)))])
-    (let* ([data (make-bytes n)]
-           [packed (bytes-append (bytes #xC7 n (int8->byte type)) data)]
-           [unpacked (call-with-input-bytes packed (λ (in) (unpack in)))])
-      (and (ext? unpacked)
-           (= type (ext-type unpacked))
-           (bytes=? data (ext-data unpacked))))))
-
-;;; Ext 16
-(check-property
-  (property ([type (choose-integer (- (expt 2 7)) (sub1 (expt 2  7)))]
-             [n    (choose-integer    (expt 2 8)  (sub1 (expt 2 16)))])
-    (let* ([data (make-bytes n)]
-           [packed (bytes-append (bytes #xC8)
-                                 (integer->integer-bytes n 2 #f #t)
-                                 (bytes (int8->byte type))
-                                 data)]
-           [unpacked (call-with-input-bytes packed (λ (in) (unpack in)))])
-      (and (ext? unpacked)
-           (= type (ext-type unpacked))
-           (bytes=? data (ext-data unpacked))))))
+;;; Ext 8, 16
+(for ([size (in-vector #(8 16))]
+      [tag  (in-naturals #XC7)])
+  (check-property
+    (property ([type (choose-integer (- (expt 2 7))
+                                     (sub1 (expt 2  7)))]
+               [n    (choose-integer (expt 2 (- size 8))
+                                     (sub1 (expt 2 size)))])
+      (let* ([data (make-bytes n)]
+             [packed (bytes-append (bytes tag)
+                                   (integer->integer-bytes* n (/ size 8) #f #t)
+                                   (bytes (int8->byte type))
+                                   data)]
+             [unpacked (call-with-input-bytes packed (λ (in) (unpack in)))])
+        (and (ext? unpacked)
+             (= type (ext-type unpacked))
+             (bytes=? data (ext-data unpacked)))))))
 
 ;;; I cannot test larger extensions because my machine runs out of memory. If
 ;;; one datum is one byte large, 2^32 data would take up 4GiB.

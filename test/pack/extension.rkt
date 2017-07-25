@@ -18,6 +18,7 @@
 #lang racket/base
 
 (require racket/port
+         racket/vector
          quickcheck
          rackunit/quickcheck
          (file "../../msgpack/main.rkt")
@@ -38,25 +39,23 @@
                  (bytes-append (bytes tag (int8->byte type))
                                (ext-data ext)))))))
 
-;;; Ext 8
-(check-property
-  (property ([type (choose-integer (- (expt 2 7)) (sub1 (expt 2 7)))]
-             [n    (choose-integer              0 (sub1 (expt 2 8)))])
-    (let ([ext (ext type (make-bytes n))])
-      (bytes=? (call-with-output-bytes (λ (out) (pack ext out)))
-               (bytes-append (bytes #xC7 n (int8->byte type))
-                             (ext-data ext))))))
-
-;;; Ext 16
-(check-property
-  (property ([type (choose-integer (- (expt 2 7)) (sub1 (expt 2  7)))]
-             [n    (choose-integer    (expt 2 8)  (sub1 (expt 2 16)))])
-    (let ([ext (ext type (make-bytes n))])
-      (bytes=? (call-with-output-bytes (λ (out) (pack ext out)))
-               (bytes-append (bytes #xC8)
-                             (integer->integer-bytes n 2 #f #t)
-                             (bytes (int8->byte type))
-                             (ext-data ext))))))
+;;; Ext 8, 16
+(for ([size (in-vector #(8 16))]
+      [tag  (in-naturals #xC7)])
+  (check-property
+    (property ([type (choose-integer (- (expt 2 7))
+                                     (sub1 (expt 2  7)))]
+               [n    (choose-integer (expt 2 (- size 8))
+                                     (sub1 (expt 2 size)))])
+      ;; Skip over the fixed sizes
+      (if (vector-member n #(1 2 4 8 16))
+        #t
+        (let ([ext (ext type (make-bytes n))])
+          (bytes=? (call-with-output-bytes (λ (out) (pack ext out)))
+                   (bytes-append (bytes tag)
+                                 (integer->integer-bytes* n (/ size 8) #f #t)
+                                 (integer->integer-bytes* type 1 #t #t)
+                                 (ext-data ext))))))))
 
 ;;; I cannot test larger extensions because my machine runs out of memory. If
 ;;; one datum is one byte large, 2^32 data would take up 4GiB.

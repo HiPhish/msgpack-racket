@@ -25,8 +25,7 @@
 
 
 ;;; Fixed map, Map 16
-(for ([size (in-vector (vector #b00001111
-                               (sub1 (expt 2 16))))])
+(for ([size (in-vector (vector #b00001111 (sub1 (expt 2 16))))])
   (check-property
     (property ([n (choose-integer 0 size)])
       (let* ([hash     (for/hash ([i (in-range 0 n)]) (values i i))]

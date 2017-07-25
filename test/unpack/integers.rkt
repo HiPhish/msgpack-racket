@@ -20,7 +20,8 @@
 (require racket/port
          quickcheck
          rackunit/quickcheck
-         (file "../../msgpack/unpack.rkt"))
+         (file "../../msgpack/unpack.rkt")
+         (file "../../msgpack/private/helpers.rkt"))
 
 ;;; There is a little trick to convert a negative number to its 2's complement
 ;;; byte: add the negative number to 256 or #x100
@@ -33,28 +34,19 @@
 ;;; Negative fixint
 (check-property
   (property ([i (choose-integer -32 -1)])
-    (= i (call-with-input-bytes (bytes (+ #x100 i))
+    (= i (call-with-input-bytes (integer->integer-bytes* i 1 #t)
                                 (λ (in) (unpack in))))))
 
-;;; Uint 8
-(check-property
-  (property ([i (choose-integer 0 #xFF)])
-    (= i (call-with-input-bytes (bytes #xCC i) (λ (in) (unpack in))))))
-
-;;; Int 8
-(check-property
-  (property ([i (choose-integer (- (expt 2 7)) (sub1 (expt 2 7)))])
-    (= i (call-with-input-bytes (bytes #xD0 (if (< i 0) (+ #x100 i) i)) (λ (in) (unpack in))))))
-
 ;;; Uint and Int 16, 32, 64
-(for ([n   (in-list '(16 32 64))]
-      [tag (in-list '(#xCD #xCE #xCF))])
+(for ([n   (in-vector #(8 16 32 64))]
+      [tag (in-naturals #xCC)])
   (for ([signed? (in-list '(#f #t))])
     (check-property
-      (property ([i (choose-integer (if signed? (- (expt 2 (sub1 n))) 0) (sub1 (expt 2 (if signed? (sub1 n) n))))])
+      (property ([i (choose-integer (if signed? (- (expt 2 (sub1 n))) 0)
+                                    (sub1 (expt 2 (if signed? (sub1 n) n))))])
         (= i
            (call-with-input-bytes
              ;; For signed types the tag is offset by 4
              (bytes-append (bytes (if signed? (+ 4 tag) tag))
-                           (integer->integer-bytes i (/ n 8) signed? #t))
+                           (integer->integer-bytes* i (/ n 8) signed? #t))
              (λ (in) (unpack in))))))))

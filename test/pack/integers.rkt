@@ -43,26 +43,30 @@
     ;; int64 to the maximum value of a uint64.
     (property ([i (choose-integer (- (expt 2 63)) (sub1 (expt 2 64)))])
       (bytes=? (call-with-output-bytes (λ (out) (pack i out)))
-               (cond [(<= 0 i  127) (bytes i)]
-                     [(<= -32 i -1) (bytes (int8->byte i))]
-                     [(uint8?  i) (bytes #xCC i)]
+               (cond [(<= 0 i  127) (integer->integer-bytes* i 1 #f #t)]
+                     [(<= -32 i -1) (integer->integer-bytes* i 1 #t #t)]
+                     [(uint8?  i)
+                      (bytes-append (bytes #xCC)
+                                    (integer->integer-bytes* i 1 #f #t))]
                      [(uint16? i)
                       (bytes-append (bytes #xCD)
-                                    (integer->integer-bytes i 2 #f #t))]
+                                    (integer->integer-bytes* i 2 #f #t))]
                      [(uint32? i)
                       (bytes-append (bytes #xCE)
-                                    (integer->integer-bytes i 4 #f #t))]
+                                    (integer->integer-bytes* i 4 #f #t))]
                      [(uint64? i)
                       (bytes-append (bytes #xCF)
-                                    (integer->integer-bytes i 8 #f #t))]
-                     [(int8?  i) (bytes #xD0 (int8->byte i))]
+                                    (integer->integer-bytes* i 8 #f #t))]
+                     [(int8?  i)
+                      (bytes-append (bytes #xD0)
+                                    (integer->integer-bytes* i 1 #t #t)) ]
                      [(int16? i)
                       (bytes-append (bytes #xD1)
-                                    (integer->integer-bytes i 2 #t #t))]
+                                    (integer->integer-bytes* i 2 #t #t))]
                      [(int32? i)
                       (bytes-append (bytes #xD2)
-                                    (integer->integer-bytes i 4 #t #t))]
+                                    (integer->integer-bytes* i 4 #t #t))]
                      [(int64? i)
                       (bytes-append (bytes #xD3)
-                                    (integer->integer-bytes i 8 #t #t))]
+                                    (integer->integer-bytes* i 8 #t #t))]
                      [else (error "Number " i " outside range in test.")])))))

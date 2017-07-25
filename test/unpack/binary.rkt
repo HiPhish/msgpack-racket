@@ -20,26 +20,20 @@
 (require racket/port
          quickcheck
          rackunit/quickcheck
-         (file "../../msgpack/unpack.rkt"))
+         (file "../../msgpack/unpack.rkt")
+         (file "../../msgpack/private/helpers.rkt"))
 
 
-;;; Bin 8
-(check-property
-  (property ([n (choose-integer 0 (sub1 (expt 2 8)))])
-    (let* ([bstr     (make-bytes n)]
-           [packed   (bytes-append (bytes #xC4 n) bstr)]
-           [unpacked (call-with-input-bytes packed (λ (in) (unpack in)))])
-      (bytes=? bstr unpacked))))
-
-;;; Bin 16
-(check-property
-  (property ([n (choose-integer 0 (sub1 (expt 2 16)))])
-    (let* ([bstr     (make-bytes n)]
-           [packed   (bytes-append (bytes #xC5)
-                                   (integer->integer-bytes n 2 #f #t)
-                                   bstr)]
-           [unpacked (call-with-input-bytes packed (λ (in) (unpack in)))])
-      (bytes=? bstr unpacked))))
+(for ([size (in-vector #(8 16))]
+      [tag  (in-naturals #xC4)])
+  (check-property
+    (property ([n (choose-integer 0 (sub1 (expt 2 size)))])
+      (let* ([bstr     (make-bytes n)]
+             [packed   (bytes-append (bytes tag)
+                                     (integer->integer-bytes* n (/ size 8) #f #t)
+                                     bstr)]
+             [unpacked (call-with-input-bytes packed (λ (in) (unpack in)))])
+        (bytes=? bstr unpacked)))))
 
 ;;; I cannot test larger byte strings because my machine runs out of memory.
 ;;; 2^16B is 64MiB, and 2^32B is 4GiB.

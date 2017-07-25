@@ -20,7 +20,8 @@
 (require racket/port
          quickcheck
          rackunit/quickcheck
-         (file "../../msgpack/unpack.rkt"))
+         (file "../../msgpack/unpack.rkt")
+         (file "../../msgpack/private/helpers.rkt"))
 
 
 ;;; Fixed string
@@ -32,23 +33,17 @@
            [unpacked (call-with-input-bytes packed (λ (in) (unpack in)))])
       (string=? str unpacked))))
 
-;;; String 8
-(check-property
-  (property ([n (choose-integer 0 (sub1 (expt 2 8)))])
-    (let* ([str      (make-string n)]
-           [packed   (bytes-append (bytes #xD9 n) (string->bytes/utf-8 str))]
-           [unpacked (call-with-input-bytes packed (λ (in) (unpack in)))])
-      (string=? str unpacked))))
-
-;;; String 16
-(check-property
-  (property ([n (choose-integer 0 (sub1 (expt 2 16)))])
-    (let* ([str      (make-string n)]
-           [packed   (bytes-append (bytes #xDA)
-                                   (integer->integer-bytes n 2 #f #t)
-                                   (string->bytes/utf-8 str))]
-           [unpacked (call-with-input-bytes packed (λ (in) (unpack in)))])
-      (string=? str unpacked))))
+;;; String 8, 16
+(for ([size (in-vector #(8 16))]
+      [tag  (in-naturals #xD9)])
+  (check-property
+    (property ([n (choose-integer 0 (sub1 (expt 2 size)))])
+      (let* ([str      (make-string n)]
+             [packed   (bytes-append (bytes tag)
+                                     (integer->integer-bytes* n (/ size 8) #f #t)
+                                     (string->bytes/utf-8 str))]
+             [unpacked (call-with-input-bytes packed (λ (in) (unpack in)))])
+        (string=? str unpacked)))))
 
 ;;; I cannot test larger strings because my machine runs out of memory.
 ;;; 2^16B is 64MiB, and 2^32 is 4GiB.

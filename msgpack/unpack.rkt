@@ -18,7 +18,8 @@
 #lang racket/base
 
 (require racket/contract/base
-         (file "main.rkt"))
+         (file "main.rkt")
+         (file "private/helpers.rkt"))
 
 (provide
   (contract-out
@@ -65,25 +66,18 @@
       [(= #xDD tag) (unpack-array  (unpack-uint 32 in) in)]
       [(= #xDE tag) (unpack-map    (unpack-uint 16 in) in)]
       [(= #xDF tag) (unpack-map    (unpack-uint 32 in) in)]
-      [(<= #xE0 tag #xFF) (- tag #x100)]  ; negative fixint
+      [(<= #xE0 tag #xFF) (integer-bytes->integer* (bytes tag) #t #t)]
       [else (error "Unknown tag")])))
 
 
 ;;; ===[ Integers ]===========================================================
 (define (unpack-uint size in)
   (let ([bstr (read-bytes (/ size 8) in)])
-    (if (= 1 (bytes-length bstr))
-      (bytes-ref bstr 0)
-      (integer-bytes->integer bstr #f #t))))
+    (integer-bytes->integer* bstr #f #t)))
 
 (define (unpack-int size in)
   (let ([bstr (read-bytes (/ size 8) in)])
-    (if (= 1 (bytes-length bstr))
-      (let ([i (bytes-ref bstr 0)])
-        (if (> i #b01111111)
-          (- i #x100)
-          i))
-      (integer-bytes->integer bstr #t #t))))
+    (integer-bytes->integer* bstr #t #t)))
 
 
 ;;; ===[ Floating point numbers ]=============================================
