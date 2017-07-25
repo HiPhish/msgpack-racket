@@ -17,31 +17,32 @@
 ;;;;     <http://www.gnu.org/licenses/>.
 #lang racket/base
 
-(require racket/port
-         quickcheck
-         rackunit/quickcheck
-         (file "../../msgpack/main.rkt"))
+(module+ test
+  (require racket/port
+           quickcheck
+           rackunit/quickcheck
+           (file "../../main.rkt"))
 
 
-;;; All floating point real numbers have double-precision by default in Racket.
-;;; This means we have to test once using the regular arbitrary real number,
-;;; and once using the number converted to single precision.
+  ;;; All floating point real numbers have double-precision by default in
+  ;;; Racket. This means we have to test once using the regular arbitrary real
+  ;;;number, and once using the number converted to single precision.
 
-;;; Predicate which adjusts to precision automatically.
-(define (packed-properly? f packed)
-  (define tag  (if (single-flonum? f) #xCA #xCB))
-  (define size (if (single-flonum? f)    4    8))
-  (bytes=? packed
-           (bytes-append (bytes tag)
-                         (real->floating-point-bytes f size #t))))
+  ;;; Predicate which adjusts to precision automatically.
+  (define (packed-properly? f packed)
+    (define tag  (if (single-flonum? f) #xCA #xCB))
+    (define size (if (single-flonum? f)    4    8))
+    (bytes=? packed
+             (bytes-append (bytes tag)
+                           (real->floating-point-bytes f size #t))))
 
-(check-property
-  (property ([f arbitrary-real])
-    (and
-      ;; Double precision
-      (let ([packed (call-with-output-bytes (λ (out) (pack f out)))])
-        (packed-properly? f packed)))
-      ;; Single precision
-      (let* ([f (real->single-flonum f)]
-             [packed (call-with-output-bytes (λ (out) (pack f out)))])
-        (packed-properly? f packed))))
+  (check-property
+    (property ([f arbitrary-real])
+      (and
+        ;; Double precision
+        (let ([packed (call-with-output-bytes (λ (out) (pack f out)))])
+          (packed-properly? f packed)))
+        ;; Single precision
+        (let* ([f (real->single-flonum f)]
+               [packed (call-with-output-bytes (λ (out) (pack f out)))])
+          (packed-properly? f packed)))))

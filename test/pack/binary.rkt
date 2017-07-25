@@ -17,24 +17,25 @@
 ;;;;     <http://www.gnu.org/licenses/>.
 #lang racket/base
 
-(require racket/port
-         quickcheck
-         rackunit/quickcheck
-         (file "../../msgpack/main.rkt")
-         (file "../../msgpack/private/helpers.rkt"))
+(module+ test
+  (require racket/port
+           quickcheck
+           rackunit/quickcheck
+           (file "../../main.rkt")
+           (file "../../private/helpers.rkt"))
 
 
-;;; Bin 8, 16
-(for ([size (in-vector #(8 16))]
-      [tag  (in-naturals #xC4)])
-  (check-property
-    (property ([n (choose-integer (expt 2 (- size 8)) (sub1 (expt 2 size)))])
-      (let* ([bstr   (make-bytes n)]
-             [packed (call-with-output-bytes (λ (out) (pack bstr out)))])
-        (bytes=? packed
-                 (bytes-append (bytes tag)
-                               (integer->integer-bytes* n (/ size 8) #f #t)
-                               bstr))))))
+  ;;; Bin 8, 16
+  (for ([size (in-vector #(8 16))]
+        [tag  (in-naturals #xC4)])
+    (check-property
+      (property ([n (choose-integer (expt 2 (- size 8)) (sub1 (expt 2 size)))])
+        (let* ([bstr   (make-bytes n)]
+               [packed (call-with-output-bytes (λ (out) (pack bstr out)))])
+          (bytes=? packed
+                   (bytes-append (bytes tag)
+                                 (integer->integer-bytes* n (/ size 8) #f #t)
+                                 bstr)))))))
 
 ;;; I cannot test larger byte strings because my machine runs out of memory.
 ;;; 2^16B is 64MiB, and 2^32B is 4GiB.

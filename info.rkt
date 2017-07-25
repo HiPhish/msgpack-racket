@@ -17,6 +17,12 @@
 ;;;;     <http://www.gnu.org/licenses/>.
 #lang info
 
-(define collection 'multi)
-(define pkg-desc "Implementation of MessagePack for Racket")
+(define name "msgpack")
+(define scribblings '(["scribblings/msgpack.scrbl" ()]))
 (define version "0.1")
+(define pkg-desc "Implementation of MessagePack for Racket")
+(define deps '("base"))
+(define build-deps '("quickcheck"
+                     "racket-doc"
+                     "rackunit-lib"
+                     "scribble-lib"))

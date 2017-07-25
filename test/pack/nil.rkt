@@ -17,11 +17,12 @@
 ;;;;     <http://www.gnu.org/licenses/>.
 #lang racket/base
 
-(require racket/port
-         rackunit
-         (file "../../msgpack/main.rkt"))
+(module+ test
+  (require racket/port
+           rackunit
+           (file "../../main.rkt"))
 
 
-(check
-  bytes=? (bytes #xC0)
-          (call-with-output-bytes (λ (out) (pack '() out))))
+  (check
+    bytes=? (bytes #xC0)
+            (call-with-output-bytes (λ (out) (pack '() out)))))

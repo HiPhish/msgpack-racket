@@ -17,40 +17,41 @@
 ;;;;     <http://www.gnu.org/licenses/>.
 #lang racket/base
 
-(require racket/port
-         quickcheck
-         rackunit/quickcheck
-         (file "../../msgpack/private/helpers.rkt")
-         (file "../../msgpack/main.rkt"))
+(module+ test
+  (require racket/port
+           quickcheck
+           rackunit/quickcheck
+           (file "../../private/helpers.rkt")
+           (file "../../main.rkt"))
 
 
-;;; This is only testing ASCII strings, what I would need would be to generate
-;;; a random string with a given size in UTF-8 bytes, but all I can do is
-;;; generate strings with a given number of characters instead. Generating a
-;;; random byte string and converting it to a string won't work because not
-;;; every byte string is a valid UTF-8 string.
+  ;;; This is only testing ASCII strings, what I would need would be to
+  ;;; generate a random string with a given size in UTF-8 bytes, but all I can
+  ;;; do is generate strings with a given number of characters instead.
+  ;;; Generating a random byte string and converting it to a string won't work
+  ;;; because not every byte string is a valid UTF-8 string.
 
-;;; Fixed string
-(check-property
-  (property ([n (choose-integer 0 #b00011111)])
-    (let* ([str    (make-string n #\a)]
-           [packed (call-with-output-bytes (λ (out) (pack str out)))])
-      (bytes=? packed
-               (bytes-append (bytes (bitwise-ior #b10100000 n))
-                             (string->bytes/utf-8 str))))))
-
-(for ([size  (in-vector #(8 16))]
-      [lower (in-vector (vector #b00011111 (expt 2 8)))]
-      [upper (in-vector (vector (sub1 (expt 2 8)) (sub1 (expt 2 16))))]
-      [tag   (in-naturals #xD9)])
+  ;;; Fixed string
   (check-property
-    (property ([n (choose-integer lower upper)])
+    (property ([n (choose-integer 0 #b00011111)])
       (let* ([str    (make-string n #\a)]
              [packed (call-with-output-bytes (λ (out) (pack str out)))])
         (bytes=? packed
-                 (bytes-append (bytes tag)
-                               (integer->integer-bytes* n (/ size 8) #f #t)
-                               (string->bytes/utf-8 str)))))))
+                 (bytes-append (bytes (bitwise-ior #b10100000 n))
+                               (string->bytes/utf-8 str))))))
+
+  (for ([size  (in-vector #(8 16))]
+        [lower (in-vector (vector #b00011111 (expt 2 8)))]
+        [upper (in-vector (vector (sub1 (expt 2 8)) (sub1 (expt 2 16))))]
+        [tag   (in-naturals #xD9)])
+    (check-property
+      (property ([n (choose-integer lower upper)])
+        (let* ([str    (make-string n #\a)]
+               [packed (call-with-output-bytes (λ (out) (pack str out)))])
+          (bytes=? packed
+                   (bytes-append (bytes tag)
+                                 (integer->integer-bytes* n (/ size 8) #f #t)
+                                 (string->bytes/utf-8 str))))))))
 
 ;;; I cannot test larger strings because my machine runs out of memory.
 ;;; 2^16B is 64MiB, and 2^32 is 4GiB.

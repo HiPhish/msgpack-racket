@@ -63,6 +63,6 @@ The following cases cannot be tested for the time being:
 License
 #######
 
-Released under the GPL v3 license, see the COPYING_ file for details.
+Released under the GPLv3 license, see the COPYING_ file for details.
 
 .. _COPYING: COPYING.txt

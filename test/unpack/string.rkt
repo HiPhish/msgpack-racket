@@ -17,33 +17,37 @@
 ;;;;     <http://www.gnu.org/licenses/>.
 #lang racket/base
 
-(require racket/port
-         quickcheck
-         rackunit/quickcheck
-         (file "../../msgpack/main.rkt")
-         (file "../../msgpack/private/helpers.rkt"))
+(module+ test
+  (require racket/port
+           quickcheck
+           rackunit/quickcheck
+           (file "../../main.rkt")
+           (file "../../private/helpers.rkt"))
 
 
-;;; Fixed string
-(check-property
-  (property ([n (choose-integer 0 (sub1 (expt 2 5)))])
-    (let* ([str      (make-string n)]
-           [packed   (bytes-append (bytes (bitwise-ior #b10100000 n))
-                                   (string->bytes/utf-8 str))]
-           [unpacked (call-with-input-bytes packed (λ (in) (unpack in)))])
-      (string=? str unpacked))))
-
-;;; String 8, 16
-(for ([size (in-vector #(8 16))]
-      [tag  (in-naturals #xD9)])
+  ;;; Fixed string
   (check-property
-    (property ([n (choose-integer 0 (sub1 (expt 2 size)))])
+    (property ([n (choose-integer 0 (sub1 (expt 2 5)))])
       (let* ([str      (make-string n)]
-             [packed   (bytes-append (bytes tag)
-                                     (integer->integer-bytes* n (/ size 8) #f #t)
+             [packed   (bytes-append (bytes (bitwise-ior #b10100000 n))
                                      (string->bytes/utf-8 str))]
              [unpacked (call-with-input-bytes packed (λ (in) (unpack in)))])
-        (string=? str unpacked)))))
+        (string=? str unpacked))))
+
+  ;;; String 8, 16
+  (for ([size (in-vector #(8 16))]
+        [tag  (in-naturals #xD9)])
+    (check-property
+      (property ([n (choose-integer 0 (sub1 (expt 2 size)))])
+        (let* ([str      (make-string n)]
+               [packed   (bytes-append (bytes tag)
+                                       (integer->integer-bytes* n
+                                                                (/ size 8)
+                                                                #f
+                                                                #t)
+                                       (string->bytes/utf-8 str))]
+               [unpacked (call-with-input-bytes packed (λ (in) (unpack in)))])
+          (string=? str unpacked))))))
 
 ;;; I cannot test larger strings because my machine runs out of memory.
 ;;; 2^16B is 64MiB, and 2^32 is 4GiB.

@@ -17,23 +17,24 @@
 ;;;;     <http://www.gnu.org/licenses/>.
 #lang racket/base
 
-(require racket/port
-         quickcheck
-         rackunit/quickcheck
-         (file "../../msgpack/main.rkt"))
+(module+ test
+  (require racket/port
+           quickcheck
+           rackunit/quickcheck
+           (file "../../main.rkt"))
 
 
-;;; Float 64 (double precision is the default in Racket)
-(check-property
-  (property ([f arbitrary-real])
-    (let ([packed (bytes-append (bytes #xCB)
-                                (real->floating-point-bytes f 8 #t))])
-      (= f (call-with-input-bytes packed (λ (in) (unpack in)))))))
+  ;;; Float 64 (double precision is the default in Racket)
+  (check-property
+    (property ([f arbitrary-real])
+      (let ([packed (bytes-append (bytes #xCB)
+                                  (real->floating-point-bytes f 8 #t))])
+        (= f (call-with-input-bytes packed (λ (in) (unpack in)))))))
 
-;;; Float 32 (similar to the above, except convert to single precision first)
-(check-property
-  (property ([f arbitrary-real])
-    (let* ([f      (real->single-flonum f)]
-           [packed (bytes-append (bytes #xCB)
-                                 (real->floating-point-bytes f 8 #t))])
-      (= f (call-with-input-bytes packed (λ (in) (unpack in)))))))
+  ;;; Float 32 (similar to the above, except convert to single precision first)
+  (check-property
+    (property ([f arbitrary-real])
+      (let* ([f      (real->single-flonum f)]
+             [packed (bytes-append (bytes #xCB)
+                                   (real->floating-point-bytes f 8 #t))])
+        (= f (call-with-input-bytes packed (λ (in) (unpack in))))))))

@@ -17,44 +17,45 @@
 ;;;;     <http://www.gnu.org/licenses/>.
 #lang racket/base
 
-(require racket/port
-         racket/vector
-         quickcheck
-         rackunit/quickcheck
-         (file "../../msgpack/main.rkt")
-         (file "../../msgpack/private/helpers.rkt"))
+(module+ test
+  (require racket/port
+           racket/vector
+           quickcheck
+           rackunit/quickcheck
+           (file "../../main.rkt")
+           (file "../../private/helpers.rkt"))
 
 
-;;; The type part of an ext is a signed 8-bit integer, i.e. a number between
-;;; -2^7 and (2^7)-1.
+  ;;; The type part of an ext is a signed 8-bit integer, i.e. a number between
+  ;;; -2^7 and (2^7)-1.
 
-;;; Fixed ext
-(for ([n   (in-vector #(1 2 4 8 16))]
-      [tag (in-naturals #xD4)])
-  (check-property
-    (property ([type (choose-integer (- (expt 2 7)) (sub1 (expt 2 7)))])
-      (let ([ext (ext type (make-bytes n))])
-        (bytes=? (call-with-output-bytes (λ (out) (pack ext out)))
-                 (bytes-append (bytes tag (int8->byte type))
-                               (ext-data ext)))))))
-
-;;; Ext 8, 16
-(for ([size (in-vector #(8 16))]
-      [tag  (in-naturals #xC7)])
-  (check-property
-    (property ([type (choose-integer (- (expt 2 7))
-                                     (sub1 (expt 2  7)))]
-               [n    (choose-integer (expt 2 (- size 8))
-                                     (sub1 (expt 2 size)))])
-      ;; Skip over the fixed sizes
-      (if (vector-member n #(1 2 4 8 16))
-        #t
+  ;;; Fixed ext
+  (for ([n   (in-vector #(1 2 4 8 16))]
+        [tag (in-naturals #xD4)])
+    (check-property
+      (property ([type (choose-integer (- (expt 2 7)) (sub1 (expt 2 7)))])
         (let ([ext (ext type (make-bytes n))])
           (bytes=? (call-with-output-bytes (λ (out) (pack ext out)))
-                   (bytes-append (bytes tag)
-                                 (integer->integer-bytes* n (/ size 8) #f #t)
-                                 (integer->integer-bytes* type 1 #t #t)
-                                 (ext-data ext))))))))
+                   (bytes-append (bytes tag (int8->byte type))
+                                 (ext-data ext)))))))
+
+  ;;; Ext 8, 16
+  (for ([size (in-vector #(8 16))]
+        [tag  (in-naturals #xC7)])
+    (check-property
+      (property ([type (choose-integer (- (expt 2 7))
+                                       (sub1 (expt 2  7)))]
+                 [n    (choose-integer (expt 2 (- size 8))
+                                       (sub1 (expt 2 size)))])
+        ;; Skip over the fixed sizes
+        (if (vector-member n #(1 2 4 8 16))
+          #t
+          (let ([ext (ext type (make-bytes n))])
+            (bytes=? (call-with-output-bytes (λ (out) (pack ext out)))
+                     (bytes-append (bytes tag)
+                                   (integer->integer-bytes* n (/ size 8) #f #t)
+                                   (integer->integer-bytes* type 1 #t #t)
+                                   (ext-data ext)))))))))
 
 ;;; I cannot test larger extensions because my machine runs out of memory. If
 ;;; one datum is one byte large, 2^32 data would take up 4GiB.

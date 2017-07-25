@@ -17,16 +17,17 @@
 ;;;;     <http://www.gnu.org/licenses/>.
 #lang racket/base
 
-(require racket/port
-         rackunit
-         (file "../../msgpack/main.rkt"))
+(module+ test
+  (require racket/port
+           rackunit
+           (file "../../main.rkt"))
 
 
-;;; There are two values and two functions: the generic 'pack' and the more
-;;; specific 'pack-boolean'. We need to test that both functions perform the
-;;; same for each value.
-(for ([val (in-vector #(#f   #t  ))]
-      [tag (in-vector #(#xC2 #xC3))])
-  (check
-    bytes=? (bytes tag)
-            (call-with-output-bytes (λ (out) (pack val out)))))
+  ;;; There are two values and two functions: the generic 'pack' and the more
+  ;;; specific 'pack-boolean'. We need to test that both functions perform the
+  ;;; same for each value.
+  (for ([val (in-vector #(#f   #t  ))]
+        [tag (in-vector #(#xC2 #xC3))])
+    (check
+      bytes=? (bytes tag)
+              (call-with-output-bytes (λ (out) (pack val out))))))

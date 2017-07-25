@@ -17,35 +17,36 @@
 ;;;;     <http://www.gnu.org/licenses/>.
 #lang racket/base
 
-(require racket/port
-         quickcheck
-         rackunit/quickcheck
-         (file "../../msgpack/main.rkt"))
+(module+ test
+  (require racket/port
+           quickcheck
+           rackunit/quickcheck
+           (file "../../main.rkt"))
 
-;;; Fixed array
-(check-property
-  (property ([n (choose-integer 0 15)])
-    (let* ([vec (make-vector n '())]
-           [packed (bytes-append (bytes (bitwise-ior #b10010000 n))
-                                 (make-bytes n #xC0))]
-           [unpacked (call-with-input-bytes packed (λ (in) (unpack in)))])
-      (and (vector? unpacked)
-           (for/and ([v1 (in-vector      vec)]
-                     [v2 (in-vector unpacked)])
-             (eq? v1 v2))))))
+  ;;; Fixed array
+  (check-property
+    (property ([n (choose-integer 0 15)])
+      (let* ([vec (make-vector n '())]
+             [packed (bytes-append (bytes (bitwise-ior #b10010000 n))
+                                   (make-bytes n #xC0))]
+             [unpacked (call-with-input-bytes packed (λ (in) (unpack in)))])
+        (and (vector? unpacked)
+             (for/and ([v1 (in-vector      vec)]
+                       [v2 (in-vector unpacked)])
+               (eq? v1 v2))))))
 
-;;; Array16
-(check-property
-  (property ([n (choose-integer 0 (sub1 (expt 2 16)))])
-    (let* ([vec (make-vector n '())]
-           [packed (bytes-append (bytes #xDC)
-                                 (integer->integer-bytes n 2 #f #t)
-                                 (make-bytes n #xC0))]
-           [unpacked (call-with-input-bytes packed (λ (in) (unpack in)))])
-      (and (vector? unpacked)
-           (for/and ([v1 (in-vector      vec)]
-                     [v2 (in-vector unpacked)])
-             (eq? v1 v2))))))
+  ;;; Array16
+  (check-property
+    (property ([n (choose-integer 0 (sub1 (expt 2 16)))])
+      (let* ([vec (make-vector n '())]
+             [packed (bytes-append (bytes #xDC)
+                                   (integer->integer-bytes n 2 #f #t)
+                                   (make-bytes n #xC0))]
+             [unpacked (call-with-input-bytes packed (λ (in) (unpack in)))])
+        (and (vector? unpacked)
+             (for/and ([v1 (in-vector      vec)]
+                       [v2 (in-vector unpacked)])
+               (eq? v1 v2)))))))
 
 ;;; I cannot test larger array because my machine runs out of memory. If one
 ;;; one element is one byte large, 2^32 element would take up 4GiB.

@@ -2,11 +2,12 @@
 @(require
   (for-label
     racket
-    msgpack
-    msgpack/pack
-    msgpack/unpack))
+    msgpack))
 
 @title{MessagePack}
+@defmodule[msgpack #:no-declare]
+@(declare-exporting msgpack msgpack/ext msgpack/pack msgpack/unpack)
+
 
 @hyperlink["http://msgpack.org/"]{MessagePack} is a binary serialisation
 format focused on speed and size. This library allows you to serialise
@@ -73,13 +74,12 @@ to the following rules:
         (list "fixext 16"         'cont)
         (list "ext 8"             'cont)
         (list "ext 16"            'cont)
-        (list "ext 32"            'cont)
-        )
-]
+        (list "ext 32"            'cont))]
 
 
-@section{MessagePack}
-@defmodule[msgpack]
+@section{Data types}
+@defmodule[msgpack/ext #:no-declare]
+@(declare-exporting msgpack msgpack/ext)
 
 @defstruct*[ext ([type integer?] [data bytes?])]{
   Represents a MessagePack @racket[ext] type, a pair of a @racket[type] integer
@@ -88,7 +88,8 @@ to the following rules:
 
 
 @section{Packing}
-@defmodule[msgpack/pack]
+@defmodule[msgpack/pack #:no-declare]
+@(declare-exporting msgpack msgpack/pack)
 
 @defproc[(pack [datum any/c] [out (and/c output-port? (not/c port-closed?))]) any]{
   Pack @racket[datum] into the @racket[out] port. The type to pack
@@ -98,7 +99,8 @@ to the following rules:
 
 
 @section{Unpacking}
-@defmodule[msgpack/unpack]
+@defmodule[msgpack/unpack #:no-declare]
+@(declare-exporting msgpack msgpack/unpack)
 
 @defproc[(unpack [in (and/c input-port? (not/c port-closed?))]) any]{
   Unpack a datum from @racket[in]. At least one byte is consumed in the process

@@ -17,35 +17,36 @@
 ;;;;     <http://www.gnu.org/licenses/>.
 #lang racket/base
 
-(require racket/port
-         quickcheck
-         rackunit/quickcheck
-         (file "../../msgpack/main.rkt"))
+(module+ test
+  (require racket/port
+           quickcheck
+           rackunit/quickcheck
+           (file "../../main.rkt"))
 
 
-;;; For every vector we need to pack the vector as well as its contents. We
-;;; will pack only a '() for simplicity, but we need to check that the '() has
-;;; been packed properly.
+  ;;; For every vector we need to pack the vector as well as its contents. We
+  ;;; will pack only a '() for simplicity, but we need to check that the '() has
+  ;;; been packed properly.
 
-;;; Fixed array
-(check-property
-  (property ([len (choose-integer 0 #b00001111)])
-    (let* ([vec    (make-vector len '())]
-           [packed (call-with-output-bytes (λ (out) (pack vec out)))])
-      (and (= (bytes-length packed) (+ 1 (vector-length vec)))
-           (= (bytes-ref packed 0) (bitwise-ior #b10010000 len))
-           (for/and ([i (in-range 1 len)])
-             (= (bytes-ref packed i) #xC0))))))
+  ;;; Fixed array
+  (check-property
+    (property ([len (choose-integer 0 #b00001111)])
+      (let* ([vec    (make-vector len '())]
+             [packed (call-with-output-bytes (λ (out) (pack vec out)))])
+        (and (= (bytes-length packed) (+ 1 (vector-length vec)))
+             (= (bytes-ref packed 0) (bitwise-ior #b10010000 len))
+             (for/and ([i (in-range 1 len)])
+               (= (bytes-ref packed i) #xC0))))))
 
-;;; Array16
-(check-property
-  (property ([len (choose-integer 16 (sub1 (expt 2 16)))])
-    (let* ([vec    (make-vector len '())]
-           [packed (call-with-output-bytes (λ (out) (pack vec out)))])
-      (and (= (bytes-length packed) (+ 3 (vector-length vec)))
-           (= (bytes-ref packed 0) #xDC)
-           (for/and ([i (in-range 0 len)])
-             (= (bytes-ref packed (+ i 3)) #xC0))))))
+  ;;; Array16
+  (check-property
+    (property ([len (choose-integer 16 (sub1 (expt 2 16)))])
+      (let* ([vec    (make-vector len '())]
+             [packed (call-with-output-bytes (λ (out) (pack vec out)))])
+        (and (= (bytes-length packed) (+ 3 (vector-length vec)))
+             (= (bytes-ref packed 0) #xDC)
+             (for/and ([i (in-range 0 len)])
+               (= (bytes-ref packed (+ i 3)) #xC0)))))))
 
 ;;; I cannot test larger array because my machine runs out of memory. If one
 ;;; one element is one byte large, 2^32 element would take up 4GiB.
