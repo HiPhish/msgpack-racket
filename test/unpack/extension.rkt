@@ -34,7 +34,9 @@
     (check-property
       (property ([type (choose-integer (- (expt 2 7)) (sub1 (expt 2 7)))])
         (let* ([data (make-bytes size)]
-               [packed (bytes-append (bytes tag (int8->byte type)) data)]
+               [packed (bytes-append (bytes tag)
+                                     (integer->integer-bytes* type 1 #t #t)
+                                     data)]
                [unpacked (call-with-input-bytes packed (λ (in) (unpack in)))])
           (and (ext? unpacked)
                (= type (ext-type unpacked))
@@ -54,7 +56,10 @@
                                                               (/ size 8)
                                                               #f
                                                               #t)
-                                     (bytes (int8->byte type))
+                                     (integer->integer-bytes* type
+                                                              1
+                                                              #t
+                                                              #t)
                                      data)]
                [unpacked (call-with-input-bytes packed (λ (in) (unpack in)))])
           (and (ext? unpacked)

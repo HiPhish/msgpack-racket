@@ -36,7 +36,8 @@
       (property ([type (choose-integer (- (expt 2 7)) (sub1 (expt 2 7)))])
         (let ([ext (ext type (make-bytes n))])
           (bytes=? (call-with-output-bytes (λ (out) (pack ext out)))
-                   (bytes-append (bytes tag (int8->byte type))
+                   (bytes-append (bytes tag)
+                                 (integer->integer-bytes* type 1 #t #t)
                                  (ext-data ext)))))))
 
   ;;; Ext 8, 16

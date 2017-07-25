@@ -182,7 +182,7 @@
          (write-bytes (integer->bytes len #f) out))])
     (let ([type (ext-type ext)]
           [data (ext-data ext)])
-      (write-byte  (int8->byte type) out)
+      (write-bytes (integer->integer-bytes* type 1 #t #t) out)
       (write-bytes data out))))
 
 
@@ -194,16 +194,16 @@
 (define (integer->bytes int signed?)
   (define (number-of-bytes)
     (if signed?
-      (cond [(int16? int) 2]
+      (cond [(int8?  int) 1]
+            [(int16? int) 2]
             [(int32? int) 4]
             [(int64? int) 8])
-      (cond [(uint16? int) 2]
+      (cond [(uint8?  int) 1]
+            [(uint16? int) 2]
             [(uint32? int) 4]
             [(uint64? int) 8])))
   (if signed?
-    (cond [(int8?  int) (bytes (int8->byte int))]
-          [(int64? int) (integer->integer-bytes int (number-of-bytes) #t #t)]
+    (cond [(int64? int) (integer->integer-bytes* int (number-of-bytes) #t #t)]
           [else (error "Signed integers may not be larger than 8 bytes")])
-    (cond [(uint8?  int) (bytes int)]
-          [(uint64? int) (integer->integer-bytes int (number-of-bytes) #f #t)]
+    (cond [(uint64? int) (integer->integer-bytes* int (number-of-bytes) #f #t)]
           [else (error "Unsigned integers may not be larger than 8 bytes")])))

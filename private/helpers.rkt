@@ -35,9 +35,7 @@
            (any/c
             (and/c bytes? (not/c immutable?))
             exact-nonnegative-integer?)
-           bytes?)]
-    [int8->byte (-> (integer-in -128 127) byte?)]
-    [byte->int8 (-> byte? (integer-in -128 127))]))
+           bytes?)]))
 
 ;;; I need this because 'integer->integer-bytes' does not support 8-bit
 ;;; integers.
