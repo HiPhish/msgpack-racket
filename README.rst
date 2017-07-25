@@ -18,13 +18,14 @@ Using
 
 .. code:: racket
 
+   (require msgpack)
+
    ;;; Packing data
-   (require msgpack/pack)
    (define out (open-output-bytes))
    (pack #x1234 out)  ;; (get-output-bytes out) returns #xCD #x12 #x34
 
    ;;; Unpacking data
-   (require msgpack/unpack)
+   (require msgpack)
    (define in (open-input-bytes (bytes #xCD #x12 #x34)))
    (unpack in)  ;; returns #x1234, or 4660 in decimal
 
@@ -40,9 +41,13 @@ may be any kind of Racket port.
 Status
 ######
 
-The library is fully functional and covered by test cases, but the API is not
-yet stabilised, changes are possible. See also below for parts of the library
-that could not be tested at the moment due to technical reasons.
+The library is fully functional ,covered by test cases, and the API should be
+reasonably mature, but I am not yet willing to completely rule out changes. See
+also below for parts of the library that could not be tested at the moment due
+to technical reasons.
+
+I am also considering switching this library to typed Racket once it has fully
+matured.
 
 
 Caveats
