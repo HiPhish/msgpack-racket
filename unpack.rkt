@@ -28,46 +28,46 @@
 
 ;;; ===[ Generic unpacking ]==================================================
 (define (unpack in)
-  (let ([tag (read-byte in)])
-    (cond
-      [(<= #x00 tag #x7F) tag]
-      [(<= #x80 tag #x8F) (unpack-map    (bitwise-and #b00001111 tag) in)]
-      [(<= #x90 tag #x9F) (unpack-array  (bitwise-and #b00001111 tag) in)]
-      [(<= #xA0 tag #xBF) (unpack-string (bitwise-and #b00011111 tag) in)]
-      [(= #xC0 tag) '()]  ; nil
-      [(= #xC1 tag) (error "MessagePack tag 0xC1 is never used")]
-      [(= #xC2 tag) #f]  ; false
-      [(= #xC3 tag) #t]  ; true
-      [(= #xC4 tag) (read-bytes (unpack-integer  8 #f in) in)]  ; bin8
-      [(= #xC5 tag) (read-bytes (unpack-integer 16 #f in) in)]  ; bin16
-      [(= #xC6 tag) (read-bytes (unpack-integer 32 #f in) in)]  ; bin32
-      [(= #xC7 tag) (unpack-ext (unpack-integer  8 #f in) in)]  ; bin64
-      [(= #xC8 tag) (unpack-ext (unpack-integer 16 #f in) in)]
-      [(= #xC9 tag) (unpack-ext (unpack-integer 32 #f in) in)]
-      [(= #xCA tag) (unpack-float 32 in)]
-      [(= #xCB tag) (unpack-float 64 in)]
-      [(= #xCC tag) (unpack-integer  8 #f in)]
-      [(= #xCD tag) (unpack-integer 16 #f in)]
-      [(= #xCE tag) (unpack-integer 32 #f in)]
-      [(= #xCF tag) (unpack-integer 64 #f in)]
-      [(= #xD0 tag) (unpack-integer  8 #t in)]
-      [(= #xD1 tag) (unpack-integer 16 #t in)]
-      [(= #xD2 tag) (unpack-integer 32 #t in)]
-      [(= #xD3 tag) (unpack-integer 64 #t in)]
-      [(= #xD4 tag) (unpack-ext    1 in)]
-      [(= #xD5 tag) (unpack-ext    2 in)]
-      [(= #xD6 tag) (unpack-ext    4 in)]
-      [(= #xD7 tag) (unpack-ext    8 in)]
-      [(= #xD8 tag) (unpack-ext   16 in)]
-      [(= #xD9 tag) (unpack-string (unpack-integer  8 #f in) in)]
-      [(= #xDA tag) (unpack-string (unpack-integer 16 #f in) in)]
-      [(= #xDB tag) (unpack-string (unpack-integer 32 #f in) in)]
-      [(= #xDC tag) (unpack-array  (unpack-integer 16 #f in) in)]
-      [(= #xDD tag) (unpack-array  (unpack-integer 32 #f in) in)]
-      [(= #xDE tag) (unpack-map    (unpack-integer 16 #f in) in)]
-      [(= #xDF tag) (unpack-map    (unpack-integer 32 #f in) in)]
-      [(<= #xE0 tag #xFF) (integer-bytes->integer* (bytes tag) #t #t)]
-      [else (error "Unknown tag")])))
+  (define tag (read-byte in))
+  (cond
+    [(<= #x00 tag #x7F) tag]
+    [(<= #x80 tag #x8F) (unpack-map    (bitwise-and #b00001111 tag) in)]
+    [(<= #x90 tag #x9F) (unpack-array  (bitwise-and #b00001111 tag) in)]
+    [(<= #xA0 tag #xBF) (unpack-string (bitwise-and #b00011111 tag) in)]
+    [(= #xC0 tag) '()]  ; nil
+    [(= #xC1 tag) (error "MessagePack tag 0xC1 is never used")]
+    [(= #xC2 tag) #f]  ; false
+    [(= #xC3 tag) #t]  ; true
+    [(= #xC4 tag) (read-bytes (unpack-integer  8 #f in) in)]  ; bin8
+    [(= #xC5 tag) (read-bytes (unpack-integer 16 #f in) in)]  ; bin16
+    [(= #xC6 tag) (read-bytes (unpack-integer 32 #f in) in)]  ; bin32
+    [(= #xC7 tag) (unpack-ext (unpack-integer  8 #f in) in)]  ; bin64
+    [(= #xC8 tag) (unpack-ext (unpack-integer 16 #f in) in)]
+    [(= #xC9 tag) (unpack-ext (unpack-integer 32 #f in) in)]
+    [(= #xCA tag) (unpack-float 32 in)]
+    [(= #xCB tag) (unpack-float 64 in)]
+    [(= #xCC tag) (unpack-integer  8 #f in)]
+    [(= #xCD tag) (unpack-integer 16 #f in)]
+    [(= #xCE tag) (unpack-integer 32 #f in)]
+    [(= #xCF tag) (unpack-integer 64 #f in)]
+    [(= #xD0 tag) (unpack-integer  8 #t in)]
+    [(= #xD1 tag) (unpack-integer 16 #t in)]
+    [(= #xD2 tag) (unpack-integer 32 #t in)]
+    [(= #xD3 tag) (unpack-integer 64 #t in)]
+    [(= #xD4 tag) (unpack-ext    1 in)]
+    [(= #xD5 tag) (unpack-ext    2 in)]
+    [(= #xD6 tag) (unpack-ext    4 in)]
+    [(= #xD7 tag) (unpack-ext    8 in)]
+    [(= #xD8 tag) (unpack-ext   16 in)]
+    [(= #xD9 tag) (unpack-string (unpack-integer  8 #f in) in)]
+    [(= #xDA tag) (unpack-string (unpack-integer 16 #f in) in)]
+    [(= #xDB tag) (unpack-string (unpack-integer 32 #f in) in)]
+    [(= #xDC tag) (unpack-array  (unpack-integer 16 #f in) in)]
+    [(= #xDD tag) (unpack-array  (unpack-integer 32 #f in) in)]
+    [(= #xDE tag) (unpack-map    (unpack-integer 16 #f in) in)]
+    [(= #xDF tag) (unpack-map    (unpack-integer 32 #f in) in)]
+    [(<= #xE0 tag #xFF) (integer-bytes->integer* (bytes tag) #t #t)]
+    [else (error "Unknown tag")]))
 
 
 ;;; ===[ Integers ]===========================================================
