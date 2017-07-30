@@ -22,5 +22,5 @@
            rackunit
            (file "../../main.rkt"))
 
-  (check-eq? '()
-             (call-with-input-bytes (bytes #xC0) (λ (in) (unpack in)))))
+  (check-pred void?
+              (call-with-input-bytes (bytes #xC0) (λ (in) (unpack in)))))

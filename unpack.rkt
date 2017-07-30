@@ -47,7 +47,7 @@
           (unpack-array  (bitwise-and #b00001111 tag-var) in-expr)]
          [(#,@(for/list ([i (in-range #xA0 #xC0)]) (datum->syntax stx i)))
           (unpack-string (bitwise-and #b00011111 tag-var) in-expr)]
-         [(#xC0) '()]  ; nil
+         [(#xC0) (void)]  ; nil
          [(#xC1) (error "MessagePack tag 0xC1 is never used")]
          [(#xC2) #f]  ; false
          [(#xC3) #t]  ; true

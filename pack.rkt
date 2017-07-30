@@ -34,7 +34,7 @@
 ;;; ===[ Generic packing ]====================================================
 (define (pack datum out)
   (cond
-    [(null?           datum) (pack-null             out)]
+    [(void?           datum) (pack-void             out)]
     [(boolean?        datum) (pack-boolean datum    out)]
     [(exact-integer?  datum) (pack-integer datum    out)]
     [(single-flonum?  datum) (pack-flonum  datum #t out)]
@@ -50,7 +50,7 @@
 
 
 ;;; ===[ Nil ]================================================================
-(define (pack-null out)
+(define (pack-void out)
   (write-byte #xC0 out))
 
 

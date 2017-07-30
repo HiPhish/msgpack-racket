@@ -25,4 +25,4 @@
 
   (check
     bytes=? (bytes #xC0)
-            (call-with-output-bytes (λ (out) (pack '() out)))))
+            (call-with-output-bytes (λ (out) (pack (void) out)))))

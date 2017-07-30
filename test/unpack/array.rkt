@@ -26,9 +26,9 @@
   ;;; Fixed array
   (check-property
     (property ([n (choose-integer 0 15)])
-      (let* ([vec (make-vector n '())]
+      (let* ([vec (make-vector n #t)]
              [packed (bytes-append (bytes (bitwise-ior #b10010000 n))
-                                   (make-bytes n #xC0))]
+                                   (make-bytes n #xC3))]
              [unpacked (call-with-input-bytes packed (λ (in) (unpack in)))])
         (and (vector? unpacked)
              (for/and ([v1 (in-vector      vec)]
@@ -38,10 +38,10 @@
   ;;; Array16
   (check-property
     (property ([n (choose-integer 0 (sub1 (expt 2 16)))])
-      (let* ([vec (make-vector n '())]
+      (let* ([vec (make-vector n #t)]
              [packed (bytes-append (bytes #xDC)
                                    (integer->integer-bytes n 2 #f #t)
-                                   (make-bytes n #xC0))]
+                                   (make-bytes n #xC3))]
              [unpacked (call-with-input-bytes packed (λ (in) (unpack in)))])
         (and (vector? unpacked)
              (for/and ([v1 (in-vector      vec)]

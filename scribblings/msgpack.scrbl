@@ -39,7 +39,7 @@ to the following rules:
   #:column-properties '(left left)
   #:row-properties '(bottom-border ())
   (list (list @bold{MessagePack type}  @bold{Racket type})
-        (list "nil"               @racket['()])
+        (list "nil"               @racket[(void)])
         (list "true"              @racket[#t])
         (list "false"             @racket[#f])
         (list "positive fixint"   @racket[integer])
