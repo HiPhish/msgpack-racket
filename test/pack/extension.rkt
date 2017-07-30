@@ -22,7 +22,7 @@
            racket/vector
            quickcheck
            rackunit/quickcheck
-           (file "../../main.rkt")
+           msgpack  ;; Why doesn't this work with a file path?
            (file "../../private/helpers.rkt"))
 
 

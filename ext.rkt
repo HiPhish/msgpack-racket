@@ -15,15 +15,11 @@
 ;;;;     You should have received a copy of the GNU General Public License
 ;;;;     along with MessagePack.rkt.  If not, see
 ;;;;     <http://www.gnu.org/licenses/>.
-#lang racket/base
-
-(require racket/contract/base)
+#lang typed/racket/base
 
 
 ;;; The MessagePack ext type does not have a direct correspondence to a Racket
 ;;; type.
-(struct ext (type data))
+(struct ext ([type : Integer] [data : Bytes]))
 
-(provide
-  (contract-out
-    [struct ext ((type (integer-in #x-80 #x7F)) (data bytes?))]))
+(provide (struct-out ext))

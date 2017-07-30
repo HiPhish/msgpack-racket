@@ -21,7 +21,7 @@
 (define scribblings '(["scribblings/msgpack.scrbl" ()]))
 (define version "0.1")
 (define pkg-desc "Implementation of MessagePack for Racket")
-(define deps '("base"))
+(define deps '("base" "typed-racket-lib"))
 (define build-deps '("quickcheck"
                      "racket-doc"
                      "rackunit-lib"
