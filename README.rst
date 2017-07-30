@@ -41,7 +41,7 @@ may be any kind of Racket port.
 Status
 ######
 
-The library is fully functional ,covered by test cases, and the API should be
+The library is fully functional, covered by test cases, and the API should be
 reasonably mature, but I am not yet willing to completely rule out changes. See
 also below for parts of the library that could not be tested at the moment due
 to technical reasons.
@@ -68,6 +68,6 @@ The following cases cannot be tested for the time being:
 License
 #######
 
-Released under the GPLv3 license, see the COPYING_ file for details.
+Released under the GPLv3+ license, see the COPYING_ file for details.
 
 .. _COPYING: COPYING.txt

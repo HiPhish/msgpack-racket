@@ -19,7 +19,8 @@
 
 (require racket/contract/base
          (file "ext.rkt")
-         (file "private/helpers.rkt"))
+         (file "private/helpers.rkt")
+         (for-syntax racket/base))
 
 (provide
   (contract-out
@@ -27,47 +28,64 @@
 
 
 ;;; ===[ Generic unpacking ]==================================================
+;;; We will use 'case' to dispatch the particular unpacking function, but that
+;;; would require spelling out every byte for the cases where an entire range
+;;; is expected, so we will instead use a macro which generates the 'case'
+;;; expression, splicing in a list of values where it makes sense.
+;;;
+;;; We cannot use macros to generate the case-clauses because the clauses are
+;;; all quoted, so we have to generate the entire case expression.
+(define-syntax (dispatch-on-case stx)
+  (syntax-case stx ()
+    [(_ tag-var in-expr)
+     #`(case tag-var
+         [(#,@(for/list ([i (in-range #x00 #x80)]) (datum->syntax stx i)))
+          tag-var]
+         [(#,@(for/list ([i (in-range #x80 #x90)]) (datum->syntax stx i)))
+          (unpack-map (bitwise-and #b00001111 tag-var) in-expr)]
+         [(#,@(for/list ([i (in-range #x90 #xA0)]) (datum->syntax stx i)))
+          (unpack-array  (bitwise-and #b00001111 tag-var) in-expr)]
+         [(#,@(for/list ([i (in-range #xA0 #xC0)]) (datum->syntax stx i)))
+          (unpack-string (bitwise-and #b00011111 tag-var) in-expr)]
+         [(#xC0) '()]  ; nil
+         [(#xC1) (error "MessagePack tag 0xC1 is never used")]
+         [(#xC2) #f]  ; false
+         [(#xC3) #t]  ; true
+         [(#xC4) (read-bytes (unpack-integer  8 #f in-expr) in-expr)]  ; bin8
+         [(#xC5) (read-bytes (unpack-integer 16 #f in-expr) in-expr)]  ; bin16
+         [(#xC6) (read-bytes (unpack-integer 32 #f in-expr) in-expr)]  ; bin32
+         [(#xC7) (unpack-ext (unpack-integer  8 #f in-expr) in-expr)]  ; bin64
+         [(#xC8) (unpack-ext (unpack-integer 16 #f in-expr) in-expr)]
+         [(#xC9) (unpack-ext (unpack-integer 32 #f in-expr) in-expr)]
+         [(#xCA) (unpack-float 32 in-expr)]
+         [(#xCB) (unpack-float 64 in-expr)]
+         [(#xCC) (unpack-integer  8 #f in-expr)]
+         [(#xCD) (unpack-integer 16 #f in-expr)]
+         [(#xCE) (unpack-integer 32 #f in-expr)]
+         [(#xCF) (unpack-integer 64 #f in-expr)]
+         [(#xD0) (unpack-integer  8 #t in-expr)]
+         [(#xD1) (unpack-integer 16 #t in-expr)]
+         [(#xD2) (unpack-integer 32 #t in-expr)]
+         [(#xD3) (unpack-integer 64 #t in-expr)]
+         [(#xD4) (unpack-ext    1 in-expr)]
+         [(#xD5) (unpack-ext    2 in-expr)]
+         [(#xD6) (unpack-ext    4 in-expr)]
+         [(#xD7) (unpack-ext    8 in-expr)]
+         [(#xD8) (unpack-ext   16 in-expr)]
+         [(#xD9) (unpack-string (unpack-integer  8 #f in-expr) in-expr)]
+         [(#xDA) (unpack-string (unpack-integer 16 #f in-expr) in-expr)]
+         [(#xDB) (unpack-string (unpack-integer 32 #f in-expr) in-expr)]
+         [(#xDC) (unpack-array  (unpack-integer 16 #f in-expr) in-expr)]
+         [(#xDD) (unpack-array  (unpack-integer 32 #f in-expr) in-expr)]
+         [(#xDE) (unpack-map    (unpack-integer 16 #f in-expr) in-expr)]
+         [(#xDF) (unpack-map    (unpack-integer 32 #f in-expr) in-expr)]
+         [(#,@(for/list ([i (in-range #xE0 #x100)]) (datum->syntax stx i)))
+          (integer-bytes->integer* (bytes tag-var) #t #t)]
+         [else (error "Unknown tag " tag-var)])]))
+
 (define (unpack in)
   (define tag (read-byte in))
-  (cond
-    [(<= #x00 tag #x7F) tag]
-    [(<= #x80 tag #x8F) (unpack-map    (bitwise-and #b00001111 tag) in)]
-    [(<= #x90 tag #x9F) (unpack-array  (bitwise-and #b00001111 tag) in)]
-    [(<= #xA0 tag #xBF) (unpack-string (bitwise-and #b00011111 tag) in)]
-    [(= #xC0 tag) '()]  ; nil
-    [(= #xC1 tag) (error "MessagePack tag 0xC1 is never used")]
-    [(= #xC2 tag) #f]  ; false
-    [(= #xC3 tag) #t]  ; true
-    [(= #xC4 tag) (read-bytes (unpack-integer  8 #f in) in)]  ; bin8
-    [(= #xC5 tag) (read-bytes (unpack-integer 16 #f in) in)]  ; bin16
-    [(= #xC6 tag) (read-bytes (unpack-integer 32 #f in) in)]  ; bin32
-    [(= #xC7 tag) (unpack-ext (unpack-integer  8 #f in) in)]  ; bin64
-    [(= #xC8 tag) (unpack-ext (unpack-integer 16 #f in) in)]
-    [(= #xC9 tag) (unpack-ext (unpack-integer 32 #f in) in)]
-    [(= #xCA tag) (unpack-float 32 in)]
-    [(= #xCB tag) (unpack-float 64 in)]
-    [(= #xCC tag) (unpack-integer  8 #f in)]
-    [(= #xCD tag) (unpack-integer 16 #f in)]
-    [(= #xCE tag) (unpack-integer 32 #f in)]
-    [(= #xCF tag) (unpack-integer 64 #f in)]
-    [(= #xD0 tag) (unpack-integer  8 #t in)]
-    [(= #xD1 tag) (unpack-integer 16 #t in)]
-    [(= #xD2 tag) (unpack-integer 32 #t in)]
-    [(= #xD3 tag) (unpack-integer 64 #t in)]
-    [(= #xD4 tag) (unpack-ext    1 in)]
-    [(= #xD5 tag) (unpack-ext    2 in)]
-    [(= #xD6 tag) (unpack-ext    4 in)]
-    [(= #xD7 tag) (unpack-ext    8 in)]
-    [(= #xD8 tag) (unpack-ext   16 in)]
-    [(= #xD9 tag) (unpack-string (unpack-integer  8 #f in) in)]
-    [(= #xDA tag) (unpack-string (unpack-integer 16 #f in) in)]
-    [(= #xDB tag) (unpack-string (unpack-integer 32 #f in) in)]
-    [(= #xDC tag) (unpack-array  (unpack-integer 16 #f in) in)]
-    [(= #xDD tag) (unpack-array  (unpack-integer 32 #f in) in)]
-    [(= #xDE tag) (unpack-map    (unpack-integer 16 #f in) in)]
-    [(= #xDF tag) (unpack-map    (unpack-integer 32 #f in) in)]
-    [(<= #xE0 tag #xFF) (integer-bytes->integer* (bytes tag) #t #t)]
-    [else (error "Unknown tag")]))
+    (dispatch-on-case tag in))
 
 
 ;;; ===[ Integers ]===========================================================
