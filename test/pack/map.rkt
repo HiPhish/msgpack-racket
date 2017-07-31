@@ -21,7 +21,7 @@
   (require racket/port
            quickcheck
            rackunit/quickcheck
-           (file "../../main.rkt"))
+           msgpack)
 
 
   ;;; Racket hash tables are packed to MessagePack maps. For simplicity we will

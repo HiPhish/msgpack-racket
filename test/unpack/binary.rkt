@@ -21,7 +21,7 @@
   (require racket/port
            quickcheck
            rackunit/quickcheck
-           (file "../../main.rkt")
+           msgpack
            (file "../../private/helpers.rkt"))
 
 

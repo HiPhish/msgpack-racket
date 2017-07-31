@@ -22,7 +22,7 @@
            quickcheck
            rackunit/quickcheck
            (file "../../private/helpers.rkt")
-           (file "../../main.rkt"))
+           msgpack)
 
 
   ;;; This is only testing ASCII strings, what I would need would be to
