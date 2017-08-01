@@ -5,9 +5,9 @@
 .. default-role:: code
 
 
-This is an implementation of MessagePack_ written in Racket_.  Currently only
-de-serialisation is implemented, I am still in the process of poking my way
-through Racket, see below for caveats.
+This is a Racket_ implementation of MessagePack_ , a binary data serialisation
+format. It allows you to serialise (pack) and de-serialise (unpack) Racket
+object to and from binary data.
 
 .. _MessagePack: http://msgpack.org/
 .. _Racket: http://racket-lang.org/
