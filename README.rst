@@ -13,29 +13,49 @@ through Racket, see below for caveats.
 .. _Racket: http://racket-lang.org/
 
 
+Installation
+############
+
+The easiest way to install this library is from the `Racket Package Catalog`_.
+Run the following code from your shell:
+
+.. code:: sh
+
+   raco pkg install msgpack
+
+.. _Racket Package Catalog: https://pkgs.racket-lang.org/
+
+
 Using
 #####
 
 .. code:: racket
 
+   ;;; Import the library first
    (require msgpack)
+
+   ;;; Some object to pack
+   (define hodgepodge (vector 1 2 (void) '#(3 #t) "foo"))
 
    ;;; Packing data
-   (define out (open-output-bytes))
-   (pack #x1234 out)  ;; (get-output-bytes out) returns #xCD #x12 #x34
+   (define packed (call-with-output-bytes (λ (out) (pack hodgepodge out))))
+   ;;; > #"\225\1\2\300\222\3\303\243foo"
 
    ;;; Unpacking data
-   (require msgpack)
-   (define in (open-input-bytes (bytes #xCD #x12 #x34)))
-   (unpack in)  ;; returns #x1234, or 4660 in decimal
+   (define unpacked (call-with-input-bytes packed (λ (in) (unpack in))))
+   ;;; > '#(1 2 #<void> #(3 #t) "foo")
 
 The `pack` function takes a Racket object and a binary output port as arguments
 and writes the serialised data to the port.  The `unpack` function takes a
 binary input port and returns one de-serialised object, consuming the necessary
-amount of bytes from the port in the process.
+amount of bytes from the port in the process. For more details please refer to
+the documentation_.
 
-In the above example code we created a port from a byte string, but the port
-may be any kind of Racket port.
+In the above example code we set the output and input ports to be byte strings
+so we could work with the packed and unpacked data directly inside the Racket
+instance.
+
+.. _documentation: https://docs.racket-lang.org/msgpack/index.html
 
 
 Status
