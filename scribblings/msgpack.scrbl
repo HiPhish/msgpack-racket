@@ -1,5 +1,6 @@
 #lang scribble/manual
 @(require
+  scribble/example
   (for-label
     racket
     msgpack))
@@ -77,7 +78,38 @@ to the following rules:
         (list "ext 32"            'cont))]
 
 
-@section{Data types}
+@section{An example session}
+
+Here we have an object in Racket which we wish to pack. The object is a vector
+of various other packable Racket objects. Objects are packed to ports, usually
+these prots point to files or network connections, but here we will use byte
+strings as ports for the sake of simplicity.
+
+@examples[#:lang racket
+          (code:comment "Import the library first")
+          (require racket/port msgpack)
+
+          (code:comment "Here is some data we want to pack:")
+          (code:comment "a vector of numbers, nothing, another vector and a string.")
+          (define hodgepodge (vector 1 2 (void) '#(3 #t) "foo"))
+
+          (code:comment "Use a byte string as the output port")
+          (define packed (call-with-output-bytes (λ (out) (pack hodgepodge out))))
+          (code:comment "The entire hodgepodge has now been packed to binary data")
+          packed
+
+          (code:comment "If we want our original hodgepodge back we need to unpack it")
+          (define unpacked (call-with-input-bytes packed (λ (in) (unpack in))))
+          unpacked]
+
+Packing and unpacking are the primitive operations associated with the
+MessagePack format, more complex tasks like sending and receiving RPC messages
+can then be implemented on top of this library.
+
+
+@section{MessagePack API}
+
+@subsection{Data types}
 @defmodule[msgpack/ext #:no-declare]
 @(declare-exporting msgpack msgpack/ext)
 
@@ -87,7 +119,7 @@ to the following rules:
 }
 
 
-@section{Packing}
+@subsection{Packing}
 @defmodule[msgpack/pack #:no-declare]
 @(declare-exporting msgpack msgpack/pack)
 
@@ -98,7 +130,7 @@ to the following rules:
 }
 
 
-@section{Unpacking}
+@subsection{Unpacking}
 @defmodule[msgpack/unpack #:no-declare]
 @(declare-exporting msgpack msgpack/unpack)
 
