@@ -16,6 +16,7 @@ format focused on speed and size. This library allows you to serialise
 
 @table-of-contents[]
 
+
 @section{Introduction}
 
 When two processes want to exchgange data they need to agree on a protocol for
@@ -43,64 +44,75 @@ to the following rules:
         (list "nil"               @racket[(void)])
         (list "true"              @racket[#t])
         (list "false"             @racket[#f])
-        (list "positive fixint"   @racket[integer])
-        (list "negative fixint"   'cont)
-        (list "uint 8"            'cont)
-        (list "uint 16"           'cont)
-        (list "uint 32"           'cont)
-        (list "uint 64"           'cont)
-        (list "int 8"             'cont)
-        (list "int 16"            'cont)
-        (list "int 32"            'cont)
-        (list "int 64"            'cont)
-        (list "fixstr"            @racket[string])
-        (list "str 8"             'cont)
-        (list "str 16"            'cont)
-        (list "str 32"            'cont)
-        (list "bin 8"             @racket[bytes])
-        (list "bin 16"            'cont)
-        (list "bin 32"            'cont)
-        (list "float 16"          @racket[real])
-        (list "float 32"          'cont)
-        (list "fixarray"          @racket[vector list])
-        (list "array 16"          'cont)
-        (list "array 32"          'cont)
-        (list "fixmap"            @racket[hash])
-        (list "map 16"            'cont)
-        (list "map 32"            'cont)
-        (list "fixext 1"          @racket[ext])
-        (list "fixext 2"          'cont)
-        (list "fixext 4"          'cont)
-        (list "fixext 8"          'cont)
-        (list "fixext 16"         'cont)
-        (list "ext 8"             'cont)
-        (list "ext 16"            'cont)
-        (list "ext 32"            'cont))]
+        (list "positive-fixint,
+               negative-fixint,
+               uint8,
+               uint16,
+               uint32,
+               uint64,
+               int8,
+               int16,
+               int32,
+               int64"
+              @racket[integer])
+        (list "fixstr,
+               str8,
+               str16,
+               str32"
+              @racket[string])
+        (list "bin8,
+               bin16,
+               bin32"
+              @racket[bytes])
+        (list "float16,
+               float32" 
+              @racket[real])
+        (list "fixarray,
+               array16,
+               array32"
+              @racket[vector list])
+        (list "fixmap,
+               map16,
+               map32"
+              @racket[hash])
+        (list "fixext1,
+               fixext2,
+               fixext4,
+               fixext8,
+               fixext16,
+               ext8,
+               ext16,
+               ext32" 
+              @racket[ext]))]
+
+When there is more than one Racket type listed @racket[unpack] will return a
+value of the first type listed.
 
 
 @section{An example session}
 
 Here we have an object in Racket which we wish to pack. The object is a vector
 of various other packable Racket objects. Objects are packed to ports, usually
-these prots point to files or network connections, but here we will use byte
+these ports point to files or network connections, but here we will use byte
 strings as ports for the sake of simplicity.
 
-@examples[#:lang racket
-          (code:comment "Import the library first")
-          (require racket/port msgpack)
+@(examples
+  #:label '()
+  (code:comment "Import the library first")
+  (eval:alts (require msgpack) (require racket/port msgpack))
 
-          (code:comment "Here is some data we want to pack:")
-          (code:comment "a vector of numbers, nothing, another vector and a string.")
-          (define hodgepodge (vector 1 2 (void) '#(3 #t) "foo"))
+  (code:comment "Here is some data we want to pack: a vector of numbers,")
+  (code:comment "nothing, another vector and a string.")
+  (define hodgepodge (vector 1 2 (void) '#(3 #t) "foo"))
 
-          (code:comment "Use a byte string as the output port")
-          (define packed (call-with-output-bytes (λ (out) (pack hodgepodge out))))
-          (code:comment "The entire hodgepodge has now been packed to binary data")
-          packed
+  (code:comment "Use a byte string as the output port")
+  (define packed (call-with-output-bytes (λ (out) (pack hodgepodge out))))
+  (code:comment "The entire hodgepodge has now been packed to binary data")
+  packed
 
-          (code:comment "If we want our original hodgepodge back we need to unpack it")
-          (define unpacked (call-with-input-bytes packed (λ (in) (unpack in))))
-          unpacked]
+  (code:comment "If we want our original hodgepodge back we need to unpack it")
+  (define unpacked (call-with-input-bytes packed (λ (in) (unpack in))))
+  unpacked)
 
 Packing and unpacking are the primitive operations associated with the
 MessagePack format, more complex tasks like sending and receiving RPC messages
