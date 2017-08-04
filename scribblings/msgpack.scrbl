@@ -6,6 +6,7 @@
     msgpack))
 
 @title{MessagePack}
+@author[@author+email["Alejandro Sanchez" "hiphish@openmailbox.org"]]
 @defmodule[msgpack #:no-declare]
 @(declare-exporting msgpack msgpack/ext msgpack/pack msgpack/unpack)
 
@@ -13,6 +14,8 @@
 @hyperlink["http://msgpack.org/"]{MessagePack} is a binary serialisation
 format focused on speed and size. This library allows you to serialise
 (@racket[pack]) and de-serialise (@racket[unpack]) Racket objects.
+
+Source code: @url["https://gitlab.com/HiPhish/MsgPack.rkt"]
 
 @table-of-contents[]
 
