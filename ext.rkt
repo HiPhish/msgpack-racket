@@ -20,6 +20,6 @@
 
 ;;; The MessagePack ext type does not have a direct correspondence to a Racket
 ;;; type.
-(struct ext ([type : Integer] [data : Bytes]) #:transparent)
+(struct ext ([type : Integer] [data : Bytes]) #:transparent #:type-name Ext)
 
-(provide (struct-out ext))
+(provide (struct-out ext) Ext)

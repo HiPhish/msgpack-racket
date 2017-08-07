@@ -135,7 +135,7 @@
 
 
 ;;; ===[ Extensions ]=========================================================
-(: unpack-ext (-> Integer Input-Port ext))
+(: unpack-ext (-> Integer Input-Port Ext))
 (define (unpack-ext size in)
   (define type (read-bytes    1 in))
   (define data (read-bytes size in))
