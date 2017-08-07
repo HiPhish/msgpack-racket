@@ -17,8 +17,8 @@
 ;;;;     <http://www.gnu.org/licenses/>.
 #lang typed/racket/base
 
-(require (file "ext.rkt")
-         (file "private/helpers.rkt"))
+(require "ext.rkt"
+         "private/helpers.rkt")
 
 (provide pack)
 
@@ -190,7 +190,7 @@
 
 
 ;;; ===[ Extensions ]=========================================================
-(: pack-ext (-> ext Output-Port Any))
+(: pack-ext (-> Ext Output-Port Any))
 (define (pack-ext ext out)
   (define len (bytes-length (ext-data ext)))
   (cond
