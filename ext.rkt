@@ -20,6 +20,12 @@
 
 ;;; The MessagePack ext type does not have a direct correspondence to a Racket
 ;;; type.
-(struct ext ([type : Integer] [data : Bytes]) #:type-name Ext)
+(struct ext
+  ([type : Integer] [data : Bytes])
+  #:type-name Ext
+  #:guard (λ (type data name)
+            (unless (<= -128 type 127)  ; Must be signed 8-bit integer
+              (error "Invalid extension type field value"))
+            (values type data)))
 
 (provide (struct-out ext) Ext)
