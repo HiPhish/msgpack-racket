@@ -21,7 +21,7 @@
   (require racket/port
            quickcheck
            rackunit/quickcheck
-           msgpack)
+           "../../main.rkt")
 
 
   ;;; Fixed map, Map 16

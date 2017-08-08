@@ -21,8 +21,8 @@
   (require racket/port
            quickcheck
            rackunit/quickcheck
-           msgpack
-           (file "../../private/helpers.rkt"))
+           "../../main.rkt"
+           "../../private/helpers.rkt")
 
 
   ;;; The type part of an ext is a signed 8-bit integer, i.e. a number between

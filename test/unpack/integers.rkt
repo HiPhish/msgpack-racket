@@ -21,8 +21,8 @@
   (require racket/port
            quickcheck
            rackunit/quickcheck
-           msgpack
-           (file "../../private/helpers.rkt"))
+           "../../main.rkt"
+           "../../private/helpers.rkt")
 
   ;;; There is a little trick to convert a negative number to its 2's
   ;;; complement byte: add the negative number to 256 or #x100

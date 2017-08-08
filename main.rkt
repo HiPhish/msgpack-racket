@@ -18,12 +18,12 @@
 #lang typed/racket/base
 
 (require racket/contract/base
-         (file "ext.rkt")
-         (file "pack.rkt")
-         (file "unpack.rkt"))
+         "ext.rkt"
+         "pack.rkt"
+         "unpack.rkt")
 
 
 (provide
-  (all-from-out (file "ext.rkt")
-                (file "pack.rkt")
-                (file "unpack.rkt")))
+  (all-from-out "ext.rkt"
+                "pack.rkt"
+                "unpack.rkt"))

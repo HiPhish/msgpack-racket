@@ -21,8 +21,8 @@
   (require racket/port
            quickcheck
            rackunit/quickcheck
-           (file "../../private/helpers.rkt")
-           msgpack)
+           "../../main.rkt"
+           "../../private/helpers.rkt")
 
 
   ;;; This is only testing ASCII strings, what I would need would be to

@@ -17,8 +17,8 @@
 ;;;;     <http://www.gnu.org/licenses/>.
 #lang typed/racket/base
 
-(require (file "ext.rkt")
-         (file "private/helpers.rkt")
+(require "ext.rkt"
+         "private/helpers.rkt"
          (for-syntax racket/base))
 
 (provide unpack)

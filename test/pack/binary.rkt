@@ -21,8 +21,8 @@
   (require racket/port
            quickcheck
            rackunit/quickcheck
-           msgpack
-           (file "../../private/helpers.rkt"))
+           "../../pack.rkt"
+           "../../private/helpers.rkt")
 
 
   ;;; Bin 8, 16

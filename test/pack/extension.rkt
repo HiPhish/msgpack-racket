@@ -22,8 +22,8 @@
            racket/vector
            quickcheck
            rackunit/quickcheck
-           msgpack  ;; Why doesn't this work with a file path?
-           (file "../../private/helpers.rkt"))
+           "../../main.rkt"
+           "../../private/helpers.rkt")
 
 
   ;;; The type part of an ext is a signed 8-bit integer, i.e. a number between

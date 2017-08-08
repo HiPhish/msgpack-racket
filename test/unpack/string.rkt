@@ -21,8 +21,8 @@
   (require racket/port
            quickcheck
            rackunit/quickcheck
-           msgpack
-           (file "../../private/helpers.rkt"))
+           "../../main.rkt"
+           "../../private/helpers.rkt")
 
 
   ;;; Fixed string

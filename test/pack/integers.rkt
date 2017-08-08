@@ -21,8 +21,8 @@
   (require racket/port
            quickcheck
            rackunit/quickcheck
-           msgpack
-           (file "../../private/helpers.rkt"))
+           "../../main.rkt"
+           "../../private/helpers.rkt")
 
 
   ;;; Integers can be packed in many ways, we need to use these predicates to

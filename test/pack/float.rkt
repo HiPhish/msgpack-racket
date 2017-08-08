@@ -21,7 +21,7 @@
   (require racket/port
            quickcheck
            rackunit/quickcheck
-           (file "../../main.rkt"))
+           "../../main.rkt")
 
 
   ;;; All floating point real numbers have double-precision by default in
