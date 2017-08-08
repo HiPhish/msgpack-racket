@@ -5,7 +5,6 @@
 ######################################
 
 
-- Port library to Typed Racket
 - Provide examples in the documentation
 - Provide benchmark measurements comparing to `serialize`/`deserialize` or
   `jsexpr->bytes`

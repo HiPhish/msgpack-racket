@@ -20,7 +20,7 @@
 (module+ test
   (require racket/port
            rackunit
-           (file "../../main.rkt"))
+           "../../main.rkt")
 
 
   (check

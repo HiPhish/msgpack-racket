@@ -21,7 +21,7 @@
   (require racket/port
            quickcheck
            rackunit/quickcheck
-           (file "../../main.rkt"))
+           "../../main.rkt")
 
 
   ;;; Float 64 (double precision is the default in Racket)

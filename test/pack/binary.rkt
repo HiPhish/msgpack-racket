@@ -21,8 +21,8 @@
   (require racket/port
            quickcheck
            rackunit/quickcheck
-           (file "../../main.rkt")
-           (file "../../private/helpers.rkt"))
+           "../../pack.rkt"
+           "../../private/helpers.rkt")
 
 
   ;;; Bin 8, 16

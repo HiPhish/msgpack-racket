@@ -15,16 +15,13 @@
 ;;;;     You should have received a copy of the GNU General Public License
 ;;;;     along with MessagePack.rkt.  If not, see
 ;;;;     <http://www.gnu.org/licenses/>.
-#lang racket/base
+#lang typed/racket/base
 
-(require racket/contract/base
-         (file "ext.rkt")
-         (file "private/helpers.rkt")
+(require "ext.rkt"
+         "private/helpers.rkt"
          (for-syntax racket/base))
 
-(provide
-  (contract-out
-    [unpack (-> (and/c input-port? (not/c port-closed?)) any/c)]))
+(provide unpack)
 
 
 ;;; ===[ Generic unpacking ]==================================================
@@ -51,65 +48,96 @@
          [(#xC1) (error "MessagePack tag 0xC1 is never used")]
          [(#xC2) #f]  ; false
          [(#xC3) #t]  ; true
-         [(#xC4) (read-bytes (unpack-integer  8 #f in-expr) in-expr)]  ; bin8
-         [(#xC5) (read-bytes (unpack-integer 16 #f in-expr) in-expr)]  ; bin16
-         [(#xC6) (read-bytes (unpack-integer 32 #f in-expr) in-expr)]  ; bin32
-         [(#xC7) (unpack-ext (unpack-integer  8 #f in-expr) in-expr)]  ; bin64
-         [(#xC8) (unpack-ext (unpack-integer 16 #f in-expr) in-expr)]
-         [(#xC9) (unpack-ext (unpack-integer 32 #f in-expr) in-expr)]
-         [(#xCA) (unpack-float 32 in-expr)]
-         [(#xCB) (unpack-float 64 in-expr)]
-         [(#xCC) (unpack-integer  8 #f in-expr)]
-         [(#xCD) (unpack-integer 16 #f in-expr)]
-         [(#xCE) (unpack-integer 32 #f in-expr)]
-         [(#xCF) (unpack-integer 64 #f in-expr)]
-         [(#xD0) (unpack-integer  8 #t in-expr)]
-         [(#xD1) (unpack-integer 16 #t in-expr)]
-         [(#xD2) (unpack-integer 32 #t in-expr)]
-         [(#xD3) (unpack-integer 64 #t in-expr)]
+         [(#xC4) (unpack-bytes (unpack-integer 1 #f in-expr) in-expr)]  ; bin8
+         [(#xC5) (unpack-bytes (unpack-integer 2 #f in-expr) in-expr)]  ; bin16
+         [(#xC6) (unpack-bytes (unpack-integer 4 #f in-expr) in-expr)]  ; bin32
+         [(#xC7) (unpack-ext (unpack-integer 1 #f in-expr) in-expr)]  ; ext8
+         [(#xC8) (unpack-ext (unpack-integer 2 #f in-expr) in-expr)]  ; ext16
+         [(#xC9) (unpack-ext (unpack-integer 4 #f in-expr) in-expr)]  ; ext32
+         [(#xCA) (unpack-float 4 in-expr)]
+         [(#xCB) (unpack-float 8 in-expr)]
+         [(#xCC) (unpack-integer 1 #f in-expr)]
+         [(#xCD) (unpack-integer 2 #f in-expr)]
+         [(#xCE) (unpack-integer 4 #f in-expr)]
+         [(#xCF) (unpack-integer 8 #f in-expr)]
+         [(#xD0) (unpack-integer 1 #t in-expr)]
+         [(#xD1) (unpack-integer 2 #t in-expr)]
+         [(#xD2) (unpack-integer 4 #t in-expr)]
+         [(#xD3) (unpack-integer 8 #t in-expr)]
          [(#xD4) (unpack-ext    1 in-expr)]
          [(#xD5) (unpack-ext    2 in-expr)]
          [(#xD6) (unpack-ext    4 in-expr)]
          [(#xD7) (unpack-ext    8 in-expr)]
          [(#xD8) (unpack-ext   16 in-expr)]
-         [(#xD9) (unpack-string (unpack-integer  8 #f in-expr) in-expr)]
-         [(#xDA) (unpack-string (unpack-integer 16 #f in-expr) in-expr)]
-         [(#xDB) (unpack-string (unpack-integer 32 #f in-expr) in-expr)]
-         [(#xDC) (unpack-array  (unpack-integer 16 #f in-expr) in-expr)]
-         [(#xDD) (unpack-array  (unpack-integer 32 #f in-expr) in-expr)]
-         [(#xDE) (unpack-map    (unpack-integer 16 #f in-expr) in-expr)]
-         [(#xDF) (unpack-map    (unpack-integer 32 #f in-expr) in-expr)]
+         [(#xD9) (unpack-string (unpack-integer 1 #f in-expr) in-expr)]
+         [(#xDA) (unpack-string (unpack-integer 2 #f in-expr) in-expr)]
+         [(#xDB) (unpack-string (unpack-integer 4 #f in-expr) in-expr)]
+         [(#xDC) (unpack-array  (unpack-integer 2 #f in-expr) in-expr)]
+         [(#xDD) (unpack-array  (unpack-integer 4 #f in-expr) in-expr)]
+         [(#xDE) (unpack-map    (unpack-integer 2 #f in-expr) in-expr)]
+         [(#xDF) (unpack-map    (unpack-integer 4 #f in-expr) in-expr)]
          [(#,@(for/list ([i (in-range #xE0 #x100)]) (datum->syntax stx i)))
           (integer-bytes->integer* (bytes tag-var) #t #t)]
          [else (error "Unknown tag " tag-var)])]))
 
+(: unpack (-> Input-Port (U Void Boolean Integer Real String Bytes VectorTop HashTableTop Ext)))
 (define (unpack in)
   (define tag (read-byte in))
-    (dispatch-on-case tag in))
+  (cond
+    [(byte? tag) (dispatch-on-case tag in)]
+    [else (raise-eof-exception)]))
+
+
+(define (raise-eof-exception)
+  (raise (exn:fail:read "Unexpected EOF" (current-continuation-marks) '())))
 
 
 ;;; ===[ Integers ]===========================================================
+(: unpack-integer (-> Integer Boolean Input-Port Integer))
 (define (unpack-integer size signed? in)
-  (integer-bytes->integer* (read-bytes (/ size 8) in) signed? #t))
+  (define in-bytes (read-bytes size in))
+  (cond
+    [(bytes? in-bytes) (integer-bytes->integer* in-bytes signed? #t)]
+    [else (raise-eof-exception)]))
 
 
 ;;; ===[ Floating point numbers ]=============================================
+(: unpack-float (-> Integer Input-Port Real))
 (define (unpack-float size in)
-  (floating-point-bytes->real (read-bytes (/ size 8) in) #t))
+  (define in-bytes (read-bytes size in))
+  (cond
+    [(bytes? in-bytes) (floating-point-bytes->real in-bytes #t)]
+    [else (raise-eof-exception)]))
+
+
+;;; ===[ Byte strings ]=======================================================
+
+(: unpack-bytes (-> Integer Input-Port Bytes))
+(define (unpack-bytes size in)
+  (define bstr (read-bytes size in))
+  (cond
+    [(bytes? bstr) bstr]
+    [else (raise-eof-exception)]))
 
 
 ;;; ===[ Unicode strings ]====================================================
+(: unpack-string (-> Integer Input-Port String))
 (define (unpack-string size in)
-  (bytes->string/utf-8 (read-bytes size in)))
+  (define in-bytes (read-bytes size in))
+  (cond
+    [(bytes? in-bytes) (bytes->string/utf-8 in-bytes)]
+    [else (raise-eof-exception)]))
 
 
 ;;; ===[ Arrays ]=============================================================
+(: unpack-array (-> Integer Input-Port VectorTop))
 (define (unpack-array size in)
   (for/vector #:length size ([_ (in-range size)])
     (unpack in)))
 
 
 ;;; ===[ Maps ]===============================================================
+(: unpack-map (-> Integer Input-Port HashTableTop))
 (define (unpack-map size in)
   (for/hash ([_ (in-range size)])
     (values (unpack in)
@@ -117,5 +145,11 @@
 
 
 ;;; ===[ Extensions ]=========================================================
+(: unpack-ext (-> Integer Input-Port Ext))
 (define (unpack-ext size in)
-  (ext (unpack-integer 8 #t in) (read-bytes size in)))
+  (define type (read-bytes    1 in))
+  (define data (read-bytes size in))
+  (cond
+    [(and (bytes? type) (bytes? data))
+     (ext (integer-bytes->integer* type #t #t) data)]
+    [else (raise-eof-exception)]))

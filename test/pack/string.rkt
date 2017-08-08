@@ -21,8 +21,8 @@
   (require racket/port
            quickcheck
            rackunit/quickcheck
-           (file "../../private/helpers.rkt")
-           (file "../../main.rkt"))
+           "../../main.rkt"
+           "../../private/helpers.rkt")
 
 
   ;;; This is only testing ASCII strings, what I would need would be to

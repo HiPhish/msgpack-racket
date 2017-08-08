@@ -129,8 +129,9 @@ can then be implemented on top of this library.
 @(declare-exporting msgpack msgpack/ext)
 
 @defstruct*[ext ([type integer?] [data bytes?])]{
-  Represents a MessagePack @racket[ext] type, a pair of a @racket[type] integer
-  and a @racket[data] byte string.
+  Represents a MessagePack extension type, a pair of a signed 8-bit
+  @racket[type] integer and a @racket[data] byte string. The type name for
+  Typed Racket is @racket[Ext].
 }
 
 

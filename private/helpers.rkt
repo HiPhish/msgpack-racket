@@ -15,33 +15,21 @@
 ;;;;     You should have received a copy of the GNU General Public License
 ;;;;     along with MessagePack.rkt.  If not, see
 ;;;;     <http://www.gnu.org/licenses/>.
-#lang racket/base
-
-(require racket/contract/base)
+#lang typed/racket/base
 
 (provide
-  (contract-out
-    [integer-bytes->integer*
-      (->* (bytes?
-            any/c)
-           (any/c
-            exact-nonnegative-integer?
-            exact-nonnegative-integer?)
-          exact-integer?)]
-    [integer->integer-bytes*
-      (->* (exact-integer?
-            (or/c 1 2 4 8)
-            any/c)
-           (any/c
-            (and/c bytes? (not/c immutable?))
-            exact-nonnegative-integer?)
-           bytes?)]))
+  integer-bytes->integer*
+  integer->integer-bytes*)
+
 
 ;;; I need this because 'integer->integer-bytes' does not support 8-bit
 ;;; integers.
+
+(: int8->byte (-> Integer Integer))
 (define (int8->byte i)
   (if (< i 0) (+ #x100 i) i))
 
+(: byte->int8 (-> Integer Integer))
 (define (byte->int8 b)
   (if (not (zero? (bitwise-and b #b10000000))) (- b #x100) b))
 
@@ -49,6 +37,9 @@
 ;;; An extension of 'integer->integer-bytes' which adds support for 8-bit
 ;;; numbers.
 
+(: integer-bytes->integer* (->* (Bytes Boolean)
+                                (Boolean Integer Integer)
+                                Integer))
 (define (integer-bytes->integer* bstr
                                  signed?
                                  [big-endian? (system-big-endian?)]
@@ -61,6 +52,9 @@
     [else
       (integer-bytes->integer bstr signed? big-endian? start end)]))
 
+(: integer->integer-bytes* (->* (Integer Integer Boolean)
+                                (Boolean Bytes Integer)
+                                Bytes))
 (define (integer->integer-bytes* n
                                  size-n
                                  signed?

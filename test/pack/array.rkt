@@ -22,7 +22,7 @@
            racket/list
            quickcheck
            rackunit/quickcheck
-           (file "../../main.rkt"))
+           "../../main.rkt")
 
 
   ;;; For every vector we need to pack the vector as well as its contents. We

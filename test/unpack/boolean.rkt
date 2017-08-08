@@ -20,7 +20,7 @@
 (module+ test
   (require racket/port
            rackunit
-           (file "../../main.rkt"))
+           "../../main.rkt")
 
   (check-false (call-with-input-bytes (bytes #xC2) (λ (in) (unpack in))))
   (check-true  (call-with-input-bytes (bytes #xC3) (λ (in) (unpack in)))))
