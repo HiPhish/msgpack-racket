@@ -66,9 +66,6 @@ reasonably mature, but I am not yet willing to completely rule out changes. See
 also below for parts of the library that could not be tested at the moment due
 to technical reasons.
 
-I am also considering switching this library to typed Racket once it has fully
-matured.
-
 
 Caveats
 #######

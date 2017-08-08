@@ -111,7 +111,6 @@
 
 
 ;;; ===[ Byte strings ]=======================================================
-
 (: unpack-bytes (-> Integer Input-Port Bytes))
 (define (unpack-bytes size in)
   (define bstr (read-bytes size in))
