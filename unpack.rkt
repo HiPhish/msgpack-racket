@@ -48,9 +48,9 @@
          [(#xC1) (error "MessagePack tag 0xC1 is never used")]
          [(#xC2) #f]  ; false
          [(#xC3) #t]  ; true
-         [(#xC4) (read-bytes (unpack-integer 1 #f in-expr) in-expr)]  ; bin8
-         [(#xC5) (read-bytes (unpack-integer 2 #f in-expr) in-expr)]  ; bin16
-         [(#xC6) (read-bytes (unpack-integer 4 #f in-expr) in-expr)]  ; bin32
+         [(#xC4) (unpack-bytes (unpack-integer 1 #f in-expr) in-expr)]  ; bin8
+         [(#xC5) (unpack-bytes (unpack-integer 2 #f in-expr) in-expr)]  ; bin16
+         [(#xC6) (unpack-bytes (unpack-integer 4 #f in-expr) in-expr)]  ; bin32
          [(#xC7) (unpack-ext (unpack-integer 1 #f in-expr) in-expr)]  ; ext8
          [(#xC8) (unpack-ext (unpack-integer 2 #f in-expr) in-expr)]  ; ext16
          [(#xC9) (unpack-ext (unpack-integer 4 #f in-expr) in-expr)]  ; ext32
@@ -80,7 +80,7 @@
           (integer-bytes->integer* (bytes tag-var) #t #t)]
          [else (error "Unknown tag " tag-var)])]))
 
-(: unpack (-> Input-Port Any))
+(: unpack (-> Input-Port (U Void Boolean Integer Real String Bytes VectorTop HashTableTop Ext)))
 (define (unpack in)
   (define tag (read-byte in))
   (cond
@@ -107,6 +107,16 @@
   (define in-bytes (read-bytes size in))
   (cond
     [(bytes? in-bytes) (floating-point-bytes->real in-bytes #t)]
+    [else (raise-eof-exception)]))
+
+
+;;; ===[ Byte strings ]=======================================================
+
+(: unpack-bytes (-> Integer Input-Port Bytes))
+(define (unpack-bytes size in)
+  (define bstr (read-bytes size in))
+  (cond
+    [(bytes? bstr) bstr]
     [else (raise-eof-exception)]))
 
 
