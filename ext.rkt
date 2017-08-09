@@ -25,7 +25,9 @@
   #:type-name Ext
   #:guard (λ (type data name)
             (unless (<= -128 type 127)  ; Must be signed 8-bit integer
-              (error "Invalid extension type field value"))
+              (raise-arguments-error 'ext "type must be within [-128, 127]"
+                                     "type" type
+                                     "data" data))
             (values type data)))
 
 (provide (struct-out ext) Ext)
