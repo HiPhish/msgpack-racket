@@ -17,15 +17,34 @@
 ;;;;     <http://www.gnu.org/licenses/>.
 #lang typed/racket/base
 
-(require racket/contract/base
-         "ext.rkt"
-         "packable.rkt"
-         "pack.rkt"
-         "unpack.rkt")
+(require "ext.rkt")
 
+(provide Packable packable?)
 
-(provide
-  (all-from-out "ext.rkt"
-                "packable.rkt"
-                "pack.rkt"
-                "unpack.rkt"))
+(define-type Packable
+  (U Void
+     Boolean
+     Integer
+     Real
+     String
+     Bytes
+     (Vectorof Packable)
+     (Listof Packable)
+     (HashTable Packable Packable)
+     Ext))
+
+(: packable? (-> Any Boolean))
+(define (packable? x)
+  (cond
+    [(void?    x) #t]
+    [(boolean? x) #t]
+    [(integer? x) #t]
+    ((real?    x) #t)
+    [(string?  x) #t]
+    [(bytes?   x) #t]
+    [(ext?     x) #t]
+    [(vector?  x) (for/and ([v (in-vector x)]) (packable? v))]
+    [(list?    x) (for/and ([v (in-list   x)]) (packable? v))]
+    [(hash?    x)
+     (for/and ([(k v) (in-hash x)]) (and (packable? k) (packable? v)))]
+    [else #f]))

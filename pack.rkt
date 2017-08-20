@@ -18,6 +18,7 @@
 #lang typed/racket/base
 
 (require "ext.rkt"
+         "packable.rkt"
          "private/helpers.rkt")
 
 (provide pack)

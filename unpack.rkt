@@ -18,6 +18,7 @@
 #lang typed/racket/base
 
 (require "ext.rkt"
+         "packable.rkt"
          "private/helpers.rkt"
          (for-syntax racket/base))
 
@@ -80,7 +81,8 @@
           (integer-bytes->integer* (bytes tag-var) #t #t)]
          [else (error "Unknown tag " tag-var)])]))
 
-(: unpack (-> Input-Port (U Void Boolean Integer Real String Bytes VectorTop HashTableTop Ext)))
+(: unpack (-> Input-Port
+              (U Void Boolean Integer Real String Bytes (Vectorof Packable) (Listof Packable) (HashTable Packable Packable) Ext)))
 (define (unpack in)
   (define tag (read-byte in))
   (cond
@@ -129,16 +131,16 @@
 
 
 ;;; ===[ Arrays ]=============================================================
-(: unpack-array (-> Integer Input-Port VectorTop))
+(: unpack-array (-> Integer Input-Port (Vectorof Packable)))
 (define (unpack-array size in)
-  (for/vector #:length size ([_ (in-range size)])
+  (for/vector : (Vectorof Packable) #:length size ([_ (in-range size)])
     (unpack in)))
 
 
 ;;; ===[ Maps ]===============================================================
-(: unpack-map (-> Integer Input-Port HashTableTop))
+(: unpack-map (-> Integer Input-Port (HashTable Packable Packable)))
 (define (unpack-map size in)
-  (for/hash ([_ (in-range size)])
+  (for/hash : (HashTable Packable Packable) ([_ (in-range size)])
     (values (unpack in)
             (unpack in))))
 
