@@ -91,7 +91,7 @@
 
 
 (define (raise-eof-exception)
-  (raise (exn:fail:read "Unexpected EOF" (current-continuation-marks) '())))
+  (raise (exn:fail:read:eof "Unexpected EOF" (current-continuation-marks) '())))
 
 
 ;;; ===[ Integers ]===========================================================
