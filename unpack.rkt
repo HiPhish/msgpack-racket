@@ -82,7 +82,7 @@
          [else (error "Unknown tag " tag-var)])]))
 
 (: unpack (-> Input-Port
-              (U Void Boolean Integer Real String Bytes (Vectorof Packable) (Listof Packable) (HashTable Packable Packable) Ext)))
+              Packable))
 (define (unpack in)
   (define tag (read-byte in))
   (cond
