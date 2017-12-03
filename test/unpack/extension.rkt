@@ -21,8 +21,7 @@
   (require racket/port
            quickcheck
            rackunit/quickcheck
-           "../../main.rkt"
-           "../../private/helpers.rkt")
+           "../../main.rkt")
 
 
   ;;; The type part of an ext is a signed 8-bit integer, i.e. a number between
@@ -35,7 +34,7 @@
       (property ([type (choose-integer (- (expt 2 7)) (sub1 (expt 2 7)))])
         (let* ([data (make-bytes size)]
                [packed (bytes-append (bytes tag)
-                                     (integer->integer-bytes* type 1 #t #t)
+                                     (integer->integer-bytes type 1 #t #t)
                                      data)]
                [unpacked (call-with-input-bytes packed (λ (in) (unpack in)))])
           (and (ext? unpacked)
@@ -52,14 +51,14 @@
                                        (sub1 (expt 2 size)))])
         (let* ([data (make-bytes n)]
                [packed (bytes-append (bytes tag)
-                                     (integer->integer-bytes* n
-                                                              (/ size 8)
-                                                              #f
-                                                              #t)
-                                     (integer->integer-bytes* type
-                                                              1
-                                                              #t
-                                                              #t)
+                                     (integer->integer-bytes n
+                                                             (/ size 8)
+                                                             #f
+                                                             #t)
+                                     (integer->integer-bytes type
+                                                             1
+                                                             #t
+                                                             #t)
                                      data)]
                [unpacked (call-with-input-bytes packed (λ (in) (unpack in)))])
           (and (ext? unpacked)

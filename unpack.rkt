@@ -19,7 +19,6 @@
 
 (require "ext.rkt"
          "packable.rkt"
-         "private/helpers.rkt"
          (for-syntax racket/base))
 
 (provide unpack)
@@ -78,7 +77,7 @@
          [(#xDE) (unpack-map    (unpack-integer 2 #f in-expr) in-expr)]
          [(#xDF) (unpack-map    (unpack-integer 4 #f in-expr) in-expr)]
          [(#,@(for/list ([i (in-range #xE0 #x100)]) (datum->syntax stx i)))
-          (integer-bytes->integer* (bytes tag-var) #t #t)]
+          (integer-bytes->integer (bytes tag-var) #t #t)]
          [else (error "Unknown tag " tag-var)])]))
 
 (: unpack (-> Input-Port
@@ -99,7 +98,7 @@
 (define (unpack-integer size signed? in)
   (define in-bytes (read-bytes size in))
   (cond
-    [(bytes? in-bytes) (integer-bytes->integer* in-bytes signed? #t)]
+    [(bytes? in-bytes) (integer-bytes->integer in-bytes signed? #t)]
     [else (raise-eof-exception)]))
 
 
@@ -152,5 +151,5 @@
   (define data (read-bytes size in))
   (cond
     [(and (bytes? type) (bytes? data))
-     (ext (integer-bytes->integer* type #t #t) data)]
+     (ext (integer-bytes->integer type #t #t) data)]
     [else (raise-eof-exception)]))

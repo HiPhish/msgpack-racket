@@ -21,8 +21,7 @@
   (require racket/port
            quickcheck
            rackunit/quickcheck
-           "../../main.rkt"
-           "../../private/helpers.rkt")
+           "../../main.rkt")
 
 
   (for ([size (in-vector #(8 16))]
@@ -31,10 +30,10 @@
       (property ([n (choose-integer 0 (sub1 (expt 2 size)))])
         (let* ([bstr     (make-bytes n)]
                [packed   (bytes-append (bytes tag)
-                                       (integer->integer-bytes* n
-                                                                (/ size 8)
-                                                                #f
-                                                                #t)
+                                       (integer->integer-bytes n
+                                                               (/ size 8)
+                                                               #f
+                                                               #t)
                                        bstr)]
                [unpacked (call-with-input-bytes packed (λ (in) (unpack in)))])
           (bytes=? bstr unpacked))))))

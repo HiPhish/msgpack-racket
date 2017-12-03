@@ -21,8 +21,7 @@
   (require racket/port
            quickcheck
            rackunit/quickcheck
-           "../../main.rkt"
-           "../../private/helpers.rkt")
+           "../../main.rkt")
 
 
   ;;; Fixed string
@@ -41,10 +40,10 @@
       (property ([n (choose-integer 0 (sub1 (expt 2 size)))])
         (let* ([str      (make-string n)]
                [packed   (bytes-append (bytes tag)
-                                       (integer->integer-bytes* n
-                                                                (/ size 8)
-                                                                #f
-                                                                #t)
+                                       (integer->integer-bytes n
+                                                               (/ size 8)
+                                                               #f
+                                                               #t)
                                        (string->bytes/utf-8 str))]
                [unpacked (call-with-input-bytes packed (λ (in) (unpack in)))])
           (string=? str unpacked))))))

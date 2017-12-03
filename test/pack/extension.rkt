@@ -22,8 +22,7 @@
            racket/vector
            quickcheck
            rackunit/quickcheck
-           "../../main.rkt"
-           "../../private/helpers.rkt")
+           "../../main.rkt")
 
 
   ;;; The type part of an ext is a signed 8-bit integer, i.e. a number between
@@ -37,7 +36,7 @@
         (let ([ext (ext type (make-bytes n))])
           (bytes=? (call-with-output-bytes (λ (out) (pack ext out)))
                    (bytes-append (bytes tag)
-                                 (integer->integer-bytes* type 1 #t #t)
+                                 (integer->integer-bytes type 1 #t #t)
                                  (ext-data ext)))))))
 
   ;;; Ext 8, 16
@@ -54,8 +53,8 @@
           (let ([ext (ext type (make-bytes n))])
             (bytes=? (call-with-output-bytes (λ (out) (pack ext out)))
                      (bytes-append (bytes tag)
-                                   (integer->integer-bytes* n (/ size 8) #f #t)
-                                   (integer->integer-bytes* type 1 #t #t)
+                                   (integer->integer-bytes n (/ size 8) #f #t)
+                                   (integer->integer-bytes type 1 #t #t)
                                    (ext-data ext)))))))))
 
 ;;; I cannot test larger extensions because my machine runs out of memory. If

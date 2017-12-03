@@ -21,8 +21,7 @@
   (require racket/port
            quickcheck
            rackunit/quickcheck
-           "../../main.rkt"
-           "../../private/helpers.rkt")
+           "../../main.rkt")
 
 
   ;;; This is only testing ASCII strings, what I would need would be to
@@ -50,7 +49,7 @@
                [packed (call-with-output-bytes (λ (out) (pack str out)))])
           (bytes=? packed
                    (bytes-append (bytes tag)
-                                 (integer->integer-bytes* n (/ size 8) #f #t)
+                                 (integer->integer-bytes n (/ size 8) #f #t)
                                  (string->bytes/utf-8 str))))))))
 
 ;;; I cannot test larger strings because my machine runs out of memory.

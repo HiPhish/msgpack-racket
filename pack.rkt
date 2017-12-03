@@ -18,8 +18,7 @@
 #lang typed/racket/base
 
 (require "ext.rkt"
-         "packable.rkt"
-         "private/helpers.rkt")
+         "packable.rkt")
 
 (provide pack)
 
@@ -212,7 +211,7 @@
      (begin
        (write-byte #xC9 out)
        (write-bytes (integer->bytes len #f) out))])
-  (write-bytes (integer->integer-bytes* (ext-type ext) 1 #t #t) out)
+  (write-bytes (integer->integer-bytes (ext-type ext) 1 #t #t) out)
   (write-bytes (ext-data ext) out))
 
 
@@ -234,4 +233,4 @@
           [( int32? int) 4]
           [( int64? int) 8]
           [else (error "Integer " int " is larger than 64-bit.")]))
-  (integer->integer-bytes* int (number-of-bytes) signed? #t))
+  (integer->integer-bytes int (number-of-bytes) signed? #t))

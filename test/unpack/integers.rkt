@@ -21,8 +21,7 @@
   (require racket/port
            quickcheck
            rackunit/quickcheck
-           "../../main.rkt"
-           "../../private/helpers.rkt")
+           "../../main.rkt")
 
   ;;; There is a little trick to convert a negative number to its 2's
   ;;; complement byte: add the negative number to 256 or #x100
@@ -35,7 +34,7 @@
   ;;; Negative fixint
   (check-property
     (property ([i (choose-integer -32 -1)])
-      (= i (call-with-input-bytes (integer->integer-bytes* i 1 #t)
+      (= i (call-with-input-bytes (integer->integer-bytes i 1 #t)
                                   (λ (in) (unpack in))))))
 
   ;;; Uint and Int 16, 32, 64
@@ -49,5 +48,5 @@
              (call-with-input-bytes
                ;; For signed types the tag is offset by 4
                (bytes-append (bytes (if signed? (+ 4 tag) tag))
-                             (integer->integer-bytes* i (/ n 8) signed? #t))
+                             (integer->integer-bytes i (/ n 8) signed? #t))
                (λ (in) (unpack in)))))))))

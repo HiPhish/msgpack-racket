@@ -21,8 +21,7 @@
   (require racket/port
            quickcheck
            rackunit/quickcheck
-           "../../pack.rkt"
-           "../../private/helpers.rkt")
+           "../../pack.rkt")
 
 
   ;;; Bin 8, 16
@@ -34,7 +33,7 @@
                [packed (call-with-output-bytes (λ (out) (pack bstr out)))])
           (bytes=? packed
                    (bytes-append (bytes tag)
-                                 (integer->integer-bytes* n (/ size 8) #f #t)
+                                 (integer->integer-bytes n (/ size 8) #f #t)
                                  bstr)))))))
 
 ;;; I cannot test larger byte strings because my machine runs out of memory.

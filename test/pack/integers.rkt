@@ -21,8 +21,7 @@
   (require racket/port
            quickcheck
            rackunit/quickcheck
-           "../../main.rkt"
-           "../../private/helpers.rkt")
+           "../../main.rkt")
 
 
   ;;; Integers can be packed in many ways, we need to use these predicates to
@@ -45,30 +44,30 @@
       (property ([i (choose-integer (- (expt 2 63)) (sub1 (expt 2 64)))])
         (bytes=?
           (call-with-output-bytes (λ (out) (pack i out)))
-          (cond [(<= 0 i  127) (integer->integer-bytes* i 1 #f #t)]
-                [(<= -32 i -1) (integer->integer-bytes* i 1 #t #t)]
+          (cond [(<= 0 i  127) (integer->integer-bytes i 1 #f #t)]
+                [(<= -32 i -1) (integer->integer-bytes i 1 #t #t)]
                 [(uint8?  i)
                  (bytes-append (bytes #xCC)
-                               (integer->integer-bytes* i 1 #f #t))]
+                               (integer->integer-bytes i 1 #f #t))]
                 [(uint16? i)
                  (bytes-append (bytes #xCD)
-                               (integer->integer-bytes* i 2 #f #t))]
+                               (integer->integer-bytes i 2 #f #t))]
                 [(uint32? i)
                  (bytes-append (bytes #xCE)
-                               (integer->integer-bytes* i 4 #f #t))]
+                               (integer->integer-bytes i 4 #f #t))]
                 [(uint64? i)
                  (bytes-append (bytes #xCF)
-                               (integer->integer-bytes* i 8 #f #t))]
+                               (integer->integer-bytes i 8 #f #t))]
                 [(int8?  i)
                  (bytes-append (bytes #xD0)
-                               (integer->integer-bytes* i 1 #t #t)) ]
+                               (integer->integer-bytes i 1 #t #t)) ]
                 [(int16? i)
                  (bytes-append (bytes #xD1)
-                               (integer->integer-bytes* i 2 #t #t))]
+                               (integer->integer-bytes i 2 #t #t))]
                 [(int32? i)
                  (bytes-append (bytes #xD2)
-                               (integer->integer-bytes* i 4 #t #t))]
+                               (integer->integer-bytes i 4 #t #t))]
                 [(int64? i)
                  (bytes-append (bytes #xD3)
-                               (integer->integer-bytes* i 8 #t #t))]
+                               (integer->integer-bytes i 8 #t #t))]
                 [else (error "Number " i " outside range in test.")]))))))
