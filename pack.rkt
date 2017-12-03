@@ -30,7 +30,7 @@
 
 
 ;;; ===[ Generic packing ]====================================================
-(: pack (-> Packable Output-Port Any))
+(: pack (-> Any Output-Port Any))
 (define (pack datum out)
   (cond
     [(void?           datum) (pack-void                                 out)]
@@ -151,7 +151,7 @@
 
 
 ;;; ===[ Arrays ]=============================================================
-(: pack-sequence (-> (U (Vectorof Packable) (Listof Packable))
+(: pack-sequence (-> (U VectorTop (Listof Any))
                      Index
                      Output-Port
                      Any))
@@ -173,7 +173,7 @@
 
 
 ;;; ===[ Maps ]===============================================================
-(: pack-hash (-> (HashTable Packable Packable) Output-Port Any))
+(: pack-hash (-> HashTableTop Output-Port Any))
 (define (pack-hash hash out)
   (define len (hash-count hash))
   (cond

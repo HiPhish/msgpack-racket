@@ -125,26 +125,9 @@ can then be implemented on top of this library.
 @section{MessagePack API}
 
 @subsection{Data types}
-
-@subsubsection{Packable types}
-@defmodule[msgpack/packable #:no-declare]
-
-@defidform[Packable]{
-  Union of all packable types for use with Typed Racket. Use this as the most
-  general type for objects you can send to @racket[pack] or receive from
-  @racket[unpack].
-}
-@defproc[(packable? [x Any]) boolean?]{
-  True if @racket[x] can be packed.
-}
-
-@subsubsection{MessagePack extension type}
 @defmodule[msgpack/ext #:no-declare]
 @(declare-exporting msgpack msgpack/ext)
 
-@defidform[Ext]{
-  The type of an @racket[ext] structure for use with Typed Racket.
-}
 @defstruct*[ext ([type integer?] [data bytes?])]{
   Represents a MessagePack extension type, a pair of a signed 8-bit
   @racket[type] integer and a @racket[data] byte string. The type name for
@@ -156,7 +139,7 @@ can then be implemented on top of this library.
 @defmodule[msgpack/pack #:no-declare]
 @(declare-exporting msgpack msgpack/pack)
 
-@defproc[(pack [datum packable?] [out (and/c output-port? (not/c port-closed?))]) any]{
+@defproc[(pack [datum any/c] [out (and/c output-port? (not/c port-closed?))]) any]{
   Pack @racket[datum] into the @racket[out] port. The type to pack
   @racket[datum] to will be determined automatically to use the least amount
   of space.
@@ -167,7 +150,7 @@ can then be implemented on top of this library.
 @defmodule[msgpack/unpack #:no-declare]
 @(declare-exporting msgpack msgpack/unpack)
 
-@defproc[(unpack [in (and/c input-port? (not/c port-closed?))]) packable?]{
+@defproc[(unpack [in (and/c input-port? (not/c port-closed?))]) any]{
   Unpack a datum from @racket[in]. At least one byte is consumed in the process
   to read the tag, more bytes are consumed as needed by the type of data.
 }
