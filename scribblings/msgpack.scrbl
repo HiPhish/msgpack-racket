@@ -125,9 +125,25 @@ can then be implemented on top of this library.
 @section{MessagePack API}
 
 @subsection{Data types}
+@subsubsection{Packable types}
+@defmodule[msgpack/packable #:no-declare]
+
+@defidform[Packable]{
+  Union of all packable types for use with Typed Racket. Use this as the most
+  general type for objects you can send to @racket[pack] or receive from
+  @racket[unpack].
+}
+@defproc[(packable? [x Any]) boolean?]{
+  True if @racket[x] can be packed.
+}
+
+@subsubsection{MessagePack extension type}
 @defmodule[msgpack/ext #:no-declare]
 @(declare-exporting msgpack msgpack/ext)
 
+@defidform[Ext]{
+  The type of an @racket[ext] structure for use with Typed Racket.
+}
 @defstruct*[ext ([type integer?] [data bytes?])]{
   Represents a MessagePack extension type, a pair of a signed 8-bit
   @racket[type] integer and a @racket[data] byte string. The type name for
