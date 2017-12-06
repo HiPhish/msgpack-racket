@@ -22,6 +22,7 @@
 ;;; type.
 (struct ext
   ([type : Integer] [data : Bytes])
+  #:transparent
   #:type-name Ext
   #:guard (λ (type data name)
             (unless (<= -128 type 127)  ; Must be signed 8-bit integer
