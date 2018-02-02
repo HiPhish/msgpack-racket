@@ -178,12 +178,14 @@
   (cond
     [(<= len #b00001111)
      (write-byte (bitwise-ior len #b10000000) out)]
+    [(uint16? len)
+     (write-byte #xDE out)
+     (write-bytes (integer->bytes len #f 2) out)]
+    [(uint32? len)
+     (write-byte #xDF out)
+     (write-bytes (integer->bytes len #f) out)]
     [else
-      (cond
-        [(uint16? len) (write-byte #xDE out)]
-        [(uint32? len) (write-byte #xDF out)]
-        [else (error "An map may contain at most 2^32 - 1 items")])
-      (write-bytes (integer->bytes len #f) out)])
+      (error "An map may contain at most 2^32 - 1 items")])
   (for ([(key value) (in-hash hash)])
     (pack key   out)
     (pack value out)))
