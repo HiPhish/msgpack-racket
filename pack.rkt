@@ -160,7 +160,7 @@
      (write-byte (bitwise-ior len #b10010000) out)]
     [(uint16? len)
      (write-byte #xDC out)
-     (write-bytes (integer->bytes len #f) out)]
+     (write-bytes (integer->bytes len #f 2) out)]
     [(uint32? len)
      (write-byte #xDD out)
      (write-bytes (integer->bytes len #f) out)]
@@ -220,10 +220,10 @@
 ;;; are allowed and we determine the length of the byte string automatically.
 ;;; Ideally we would use 'integer->integer-bytes', but that function does not
 ;;; support 8-bit integers, so we need this for the time being.
-(: integer->bytes (-> Integer Boolean Bytes))
-(define (integer->bytes int signed?)
-  (: number-of-bytes (-> Integer))
-  (define (number-of-bytes)
+(: integer->bytes (->* (Integer Boolean) ((U #f 1 2 4 8)) Bytes))
+(define (integer->bytes int signed? [size #f])
+  ;; Pick size if none is specified
+  (define (number-of-bytes) : (U 1 2 4 8)
     (cond [(uint8?  int) 1]
           [(uint16? int) 2]
           [(uint32? int) 4]
@@ -233,4 +233,4 @@
           [( int32? int) 4]
           [( int64? int) 8]
           [else (error "Integer " int " is larger than 64-bit.")]))
-  (integer->integer-bytes int (number-of-bytes) signed? #t))
+  (integer->integer-bytes int (or size (number-of-bytes)) signed? #t))

@@ -49,7 +49,7 @@
 
   ;;; Array16
   (check-property
-    (property ([len (choose-integer 16 (sub1 (expt 2 16)))])
+    (property ([len (choose-integer 8 (sub1 (expt 2 16)))])
       (let* ([vec    (make-vector len #t)]
              [lst    (make-list   len #t)]
              [packed-v (call-with-output-bytes (λ (out) (pack vec out)))]
