@@ -24,7 +24,7 @@ name = msgpack
 
 
 # ===[ Phony targets ]========================================================
-.PHONY: help install
+.PHONY: help install remove
 
 help:
 	@echo 'Usage: make (help | install | uninstall)'
