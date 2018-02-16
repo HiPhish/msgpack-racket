@@ -23,11 +23,19 @@ Run the following code from your shell:
 
    raco pkg install msgpack
 
+If you wish to install the package from this repository use the included
+makefile:
+
+.. code:: sh
+
+   make install   # Install the package
+   make remove    # Uninstall the package
+
 .. _Racket Package Catalog: https://pkgs.racket-lang.org/
 
 
-Using
-#####
+Using MessagePack
+#################
 
 .. code:: racket
 
