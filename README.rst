@@ -5,7 +5,7 @@
 .. default-role:: code
 
 
-This is a Racket_ implementation of MessagePack_ , a binary data serialisation
+This is a Racket_ implementation of MessagePack_, a binary data serialisation
 format. It allows you to serialise (pack) and de-serialise (unpack) Racket
 object to and from binary data.
 
